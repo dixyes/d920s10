@@ -20,7 +20,7 @@ POSIX_UEFI_PATH=<path to posix-uefi> ./buildaa64.sh
 
 1. PCCT table is corrupt, removed
 2. RTC0 missing _HID, patched with ssdt, source is in fix-rtc0-hid.dsl
-3. I have not found and gpu with win aa64 drivers, so use gop resolution changed it
+3. I have not found any gpu with win aa64 drivers, so use gop resolution changed it
 4. When not invoked from cli, it chainloads bootmgr
 
 ## License
