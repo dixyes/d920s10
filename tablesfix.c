@@ -471,7 +471,10 @@ int main(int argc, char **argv) {
             printf("System Manufacturer: %s\n", dmi_string(smbios_table, ((SMBIOS_TABLE_TYPE1 *) smbios_table)->Manufacturer));
             p_str = dmi_string(smbios_table, ((SMBIOS_TABLE_TYPE1 *) smbios_table)->ProductName);
             printf("System Product Name: %s\n", p_str);
-            if (p_str && !memcmp(p_str, "W510", 4)) {
+            if (p_str && (
+                memmem(p_str, strlen(p_str), "W510", 4) ||
+                memmem(p_str, strlen(p_str), "PGU-WBY0", 8)
+            )) {
                 is_w510 = 1;
             }
         }
