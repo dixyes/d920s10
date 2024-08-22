@@ -1317,6 +1317,7 @@ const efi_guid_t gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 const efi_guid_t acpi_proto_guid = EFI_ACPI_TABLE_PROTOCOL_GUID;
 const efi_guid_t acpi_sdt_guid = EFI_ACPI_SDT_PROTOCOL_GUID;
 const efi_guid_t smbios_guid = EFI_SMBIOS_PROTOCOL_GUID;
+const efi_guid_t pciio_proto_guid = EFI_PCI_IO_PROTOCOL_GUID;
 
 #define white() ST->ConOut->SetAttribute(ST->ConOut, EFI_RED | EFI_GREEN | EFI_BLUE)
 #define bright() ST->ConOut->SetAttribute(ST->ConOut, EFI_WHITE)
@@ -1343,6 +1344,7 @@ int main(int argc, char **argv) {
     EFI_ACPI_TABLE_PROTOCOL *acpi_table = NULL;
     EFI_ACPI_SDT_PROTOCOL *acpi_sdt = NULL;
     EFI_SMBIOS_PROTOCOL *smbios = NULL;
+    // EFI_PCI_IO_PROTOCOL *pciio = NULL;
 
     uint8_t cpus = 0; // up to 4 way?
     boolean_t has_dbg2 = 0;
@@ -1355,6 +1357,81 @@ int main(int argc, char **argv) {
     efi_configuration_table_t *p_table;
     EFI_ACPI_2_0_ROOT_SYSTEM_DESCRIPTION_POINTER *rsdp;
     EFI_ACPI_SDT_HEADER *xsdt, **sdt;
+
+    // ret = BS->LocateProtocol((void*)&pciio_proto_guid, NULL, (void**)&pciio);
+    // if (EFI_SUCCESS != ret || NULL == pciio) {
+    //     printf("failed LocateProtocol EFI_PCI_IO_PROTOCOL: %d\n", ret);
+    //     return 1;
+    // }
+    // printf("PCI IO Protocol: %p\n", pciio);
+
+    // uint64_t handles_size = 0;
+    // efi_handle_t *handles = NULL;
+    // ret = BS->LocateHandle(ByProtocol, (void*)&pciio_proto_guid, NULL, &handles_size, handles);
+    // if (EFI_BUFFER_TOO_SMALL != ret) {
+    //     printf("failed LocateHandle 1 EFI_PCI_IO_PROTOCOL: %d\n", ret);
+    //     return 1;
+    // }
+    // ret = BS->AllocatePool(EfiBootServicesData, handles_size, (void*)&handles);
+    // if (EFI_SUCCESS != ret) {
+    //     printf("failed AllocatePool: %d\n", ret);
+    //     return 1;
+    // }
+    // ret = BS->LocateHandle(ByProtocol, (void*)&pciio_proto_guid, NULL, &handles_size, handles);
+    // if (EFI_SUCCESS != ret) {
+    //     printf("failed LocateHandle 2 EFI_PCI_IO_PROTOCOL: %d\n", ret);
+    //     return 1;
+    // }
+
+    // for (uint64_t i = 0; i < handles_size / sizeof(efi_handle_t); i++) {
+    //     printf("PCI IO Handle: %p\n", handles[i]);
+    //     ret = BS->HandleProtocol(handles[i], (void*)&pciio_proto_guid, (void**)&pciio);
+    //     if (EFI_SUCCESS != ret) {
+    //         printf("failed HandleProtocol EFI_PCI_IO_PROTOCOL: %d\n", ret);
+    //         continue;
+    //     }
+
+    //     PCI_TYPE00 pci;
+
+    //     ret = pciio->Pci.Read(pciio, EfiPciIoWidthUint8, 0, sizeof(pci), &pci);
+    //     if (EFI_SUCCESS != ret) {
+    //         printf("failed Read PCI: %d\n", ret);
+    //         goto skip;
+    //     }
+
+    //     printf("PCI: %04x:%04x\n", pci.Hdr.VendorId, pci.Hdr.DeviceId);
+
+    //     // if (pci.Hdr.VendorId == 0x1ed5 && pci.Hdr.DeviceId == 0x0102) { // MTT
+    //     if (pci.Hdr.VendorId == 0x1a03 && pci.Hdr.DeviceId == 0x2000) { // AST2500
+    //         printf("found AST\n");
+    //         break;
+    //     }
+        
+    //     skip:
+    //     pciio = NULL;
+    // }
+
+    // if (!pciio) {
+    //     printf("failed to find AST\n");
+    //     return 1;
+    // }
+
+    // EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *res;
+    // for (int i = 0; i < 6; i++) {
+    //     ret = pciio->GetBarAttributes(pciio, i, NULL, (void **)&res);
+    //     if (EFI_SUCCESS != ret) {
+    //         printf("failed GetBarAttributes %d: %d\n", i, ret);
+    //         continue;
+    //     }
+    //     printf("BAR %d: %016x %016x\n", i, res->AddrRangeMin, res->AddrRangeMax);
+    //     // write something to bar 0
+    //     if (i == 0) {
+    //         uint32_t *p = (void*)(uintptr_t)res->AddrRangeMin;
+    //         for (int i = 0; i < 0x1000; i++) {
+    //             p[i] = 0xdeadbeef;
+    //         }
+    //     }
+    // }
 
     // ret = BS->LocateProtocol((void*)&gop_guid, NULL, (void**)&gop);
     // if(EFI_ERROR(ret) || !gop) {
@@ -1369,12 +1446,20 @@ int main(int argc, char **argv) {
     //         // } else {
     //         //     gprintf("Set Resolution: OK\n");
     //         // }
+    //         printf("FrameBufferBase: %p\n", gop->Mode->FrameBufferBase);
+    //         printf("FrameBufferSize: %08x\n", gop->Mode->FrameBufferSize);
+    //         printf("HorizontalResolution: %d\n", gop->Mode->Information->HorizontalResolution);
+    //         printf("VerticalResolution: %d\n", gop->Mode->Information->VerticalResolution);
+    //         printf("PixelsPerScanLine: %d\n", gop->Mode->Information->PixelsPerScanLine);
     //         printf("PixelFormat: %08x\n", gop->Mode->Information->PixelFormat);
-    //         printf("PixelInformation: %08x\n", gop->Mode->Information->PixelInformation);
+    //         printf("BlueMask: %08x\n", gop->Mode->Information->PixelInformation.BlueMask);
+    //         printf("GreenMask: %08x\n", gop->Mode->Information->PixelInformation.GreenMask);
+    //         printf("RedMask: %08x\n", gop->Mode->Information->PixelInformation.RedMask);
     //         uint32_t *pPixel = (void*)(uintptr_t)gop->Mode->FrameBufferBase;
-    //         for (int i = 0; i < 2000; i++) {
+    //         for (int i = 0; i < gop->Mode->FrameBufferSize >> 2; i++) {
     //             pPixel[i] = 0x6666ccff;
     //         }
+
     //     }
     // }
 

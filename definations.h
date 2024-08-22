@@ -25,6 +25,8 @@
     }
 #define EFI_SMBIOS_PROTOCOL_GUID \
     { 0x3583ff6, 0xcb36, 0x4940, { 0x94, 0x7e, 0xb9, 0xb3, 0x9f, 0x4a, 0xfa, 0xf7 }}
+#define EFI_PCI_IO_PROTOCOL_GUID \
+    { 0x4cf5b200, 0x68b8, 0x4ca5, { 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x2, 0x9a }}
 
 /* acpi protocol */
 
@@ -170,29 +172,29 @@ typedef uint32_t  EFI_ACPI_TABLE_VERSION;
 typedef
 efi_status_t
 (EFIAPI *EFI_ACPI_GET_ACPI_TABLE2)(
-  uintn_t                   Index,
-  EFI_ACPI_SDT_HEADER     **Table,
-  EFI_ACPI_TABLE_VERSION  *Version,
-  uintn_t                   *TableKey
-  );
+    uintn_t                   Index,
+    EFI_ACPI_SDT_HEADER     **Table,
+    EFI_ACPI_TABLE_VERSION  *Version,
+    uintn_t                   *TableKey
+);
 
 #pragma pack(pop)
 
 typedef struct _EFI_ACPI_SDT_PROTOCOL {
-  ///
-  /// A bit map containing all the ACPI versions supported by this protocol.
-  ///
-  EFI_ACPI_TABLE_VERSION      AcpiVersion;
-  EFI_ACPI_GET_ACPI_TABLE2      GetAcpiTable;
-/* not used */
-//   EFI_ACPI_REGISTER_NOTIFY    RegisterNotify;
-//   EFI_ACPI_OPEN               Open;
-//   EFI_ACPI_OPEN_SDT           OpenSdt;
-//   EFI_ACPI_CLOSE              Close;
-//   EFI_ACPI_GET_CHILD          GetChild;
-//   EFI_ACPI_GET_OPTION         GetOption;
-//   EFI_ACPI_SET_OPTION         SetOption;
-//   EFI_ACPI_FIND_PATH          FindPath;
+    ///
+    /// A bit map containing all the ACPI versions supported by this protocol.
+    ///
+    EFI_ACPI_TABLE_VERSION      AcpiVersion;
+    EFI_ACPI_GET_ACPI_TABLE2      GetAcpiTable;
+    /* not used */
+    // EFI_ACPI_REGISTER_NOTIFY    RegisterNotify;
+    // EFI_ACPI_OPEN               Open;
+    // EFI_ACPI_OPEN_SDT           OpenSdt;
+    // EFI_ACPI_CLOSE              Close;
+    // EFI_ACPI_GET_CHILD          GetChild;
+    // EFI_ACPI_GET_OPTION         GetOption;
+    // EFI_ACPI_SET_OPTION         SetOption;
+    // EFI_ACPI_FIND_PATH          FindPath;
 } EFI_ACPI_SDT_PROTOCOL;
 
 
@@ -207,16 +209,16 @@ typedef struct _EFI_ACPI_SDT_PROTOCOL {
 // A macro to initialise the common header part of EFI ACPI tables as defined by
 // EFI_ACPI_DESCRIPTION_HEADER structure.
 #define ARM_ACPI_HEADER(Signature, Type, Revision) {            \
-  Signature,                      /* UINT32  Signature */       \
-  sizeof (Type),                  /* UINT32  Length */          \
-  Revision,                       /* UINT8   Revision */        \
-  0,                              /* UINT8   Checksum */        \
-  { EFI_ACPI_ARM_OEM_ID },        /* UINT8   OemId[6] */        \
-  { 'H','I','P','0','8',' ',' ',' ' }/*EFI_ACPI_ARM_OEM_TABLE_ID*/,      /* UINT64  OemTableId */      \
-  EFI_ACPI_ARM_OEM_REVISION,      /* UINT32  OemRevision */     \
-  0x49534948/*EFI_ACPI_ARM_CREATOR_ID*/,        /* UINT32  CreatorId */       \
-  EFI_ACPI_ARM_CREATOR_REVISION   /* UINT32  CreatorRevision */ \
-  }
+    Signature,                      /* UINT32  Signature */       \
+    sizeof (Type),                  /* UINT32  Length */          \
+    Revision,                       /* UINT8   Revision */        \
+    0,                              /* UINT8   Checksum */        \
+    { EFI_ACPI_ARM_OEM_ID },        /* UINT8   OemId[6] */        \
+    { 'H','I','P','0','8',' ',' ',' ' }/*EFI_ACPI_ARM_OEM_TABLE_ID*/,      /* UINT64  OemTableId */      \
+    EFI_ACPI_ARM_OEM_REVISION,      /* UINT32  OemRevision */     \
+    0x49534948/*EFI_ACPI_ARM_CREATOR_ID*/,        /* UINT32  CreatorId */       \
+    EFI_ACPI_ARM_CREATOR_REVISION   /* UINT32  CreatorRevision */ \
+    }
 
 
 #if __GNUC__ > 3
@@ -254,43 +256,43 @@ typedef struct _EFI_ACPI_SDT_PROTOCOL {
 /* device path protocol */
 
 typedef struct {
-  uint8_t    Type;
-  uint8_t    SubType;
-  uint8_t    Length[2];
+    uint8_t    Type;
+    uint8_t    SubType;
+    uint8_t    Length[2];
 } EFI_DEVICE_PATH_PROTOCOL;
 
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_FROM_TEXT_NODE)(
-  const wchar_t                 *TextDeviceNode
-  );
+    const wchar_t                 *TextDeviceNode
+);
 
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_FROM_TEXT_PATH)(
-  const wchar_t                 *TextDevicePath
-  );
+    const wchar_t                 *TextDevicePath
+);
 
 typedef struct {
-  EFI_DEVICE_PATH_FROM_TEXT_NODE    ConvertTextToDeviceNode;
-  EFI_DEVICE_PATH_FROM_TEXT_PATH    ConvertTextToDevicePath;
+    EFI_DEVICE_PATH_FROM_TEXT_NODE    ConvertTextToDeviceNode;
+    EFI_DEVICE_PATH_FROM_TEXT_PATH    ConvertTextToDevicePath;
 } EFI_DEVICE_PATH_FROM_TEXT_PROTOCOL;
 
 typedef
 wchar_t *
 (EFIAPI *EFI_DEVICE_PATH_TO_TEXT_NODE)(
-  const EFI_DEVICE_PATH_PROTOCOL   *DeviceNode,
-  boolean_t                          DisplayOnly,
-  boolean_t                          AllowShortcuts
-  );
+    const EFI_DEVICE_PATH_PROTOCOL   *DeviceNode,
+    boolean_t                          DisplayOnly,
+    boolean_t                          AllowShortcuts
+);
 
 typedef
 wchar_t *
 (EFIAPI *EFI_DEVICE_PATH_TO_TEXT_PATH)(
-  const EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
-  boolean_t                          DisplayOnly,
-  boolean_t                          AllowShortcuts
-  );
+    const EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
+    boolean_t                          DisplayOnly,
+    boolean_t                          AllowShortcuts
+);
 
 typedef struct {
   EFI_DEVICE_PATH_TO_TEXT_NODE    ConvertDeviceNodeToText;
@@ -301,56 +303,56 @@ typedef struct {
 typedef
 uintn_t
 (EFIAPI *EFI_DEVICE_PATH_UTILS_GET_DEVICE_PATH_SIZE)(
-  const EFI_DEVICE_PATH_PROTOCOL *DevicePath
-  );
+    const EFI_DEVICE_PATH_PROTOCOL *DevicePath
+);
  
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_UTILS_DUP_DEVICE_PATH)(
-  const EFI_DEVICE_PATH_PROTOCOL *DevicePath
-  );
+    const EFI_DEVICE_PATH_PROTOCOL *DevicePath
+);
  
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_UTILS_APPEND_PATH)(
-  const EFI_DEVICE_PATH_PROTOCOL *Src1,
-  const EFI_DEVICE_PATH_PROTOCOL *Src2
-  );
+    const EFI_DEVICE_PATH_PROTOCOL *Src1,
+    const EFI_DEVICE_PATH_PROTOCOL *Src2
+);
  
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_UTILS_APPEND_NODE)(
-  const EFI_DEVICE_PATH_PROTOCOL *DevicePath,
-  const EFI_DEVICE_PATH_PROTOCOL *DeviceNode
-  );
+    const EFI_DEVICE_PATH_PROTOCOL *DevicePath,
+    const EFI_DEVICE_PATH_PROTOCOL *DeviceNode
+);
  
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_UTILS_APPEND_INSTANCE)(
-  const EFI_DEVICE_PATH_PROTOCOL *DevicePath,
-  const EFI_DEVICE_PATH_PROTOCOL *DevicePathInstance
-  );
+    const EFI_DEVICE_PATH_PROTOCOL *DevicePath,
+    const EFI_DEVICE_PATH_PROTOCOL *DevicePathInstance
+);
  
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_UTILS_GET_NEXT_INSTANCE)(
-  EFI_DEVICE_PATH_PROTOCOL  **DevicePathInstance,
-  uintn_t                         *DevicePathInstanceSize
-  );
+    EFI_DEVICE_PATH_PROTOCOL  **DevicePathInstance,
+    uintn_t                         *DevicePathInstanceSize
+);
  
 typedef
 EFI_DEVICE_PATH_PROTOCOL *
 (EFIAPI *EFI_DEVICE_PATH_UTILS_CREATE_NODE)(
-  uint8_t                          NodeType,
-  uint8_t                          NodeSubType,
-  uint16_t                         NodeLength
-  );
+    uint8_t                          NodeType,
+    uint8_t                          NodeSubType,
+    uint16_t                         NodeLength
+);
  
 typedef
 boolean_t
 (EFIAPI *EFI_DEVICE_PATH_UTILS_IS_MULTI_INSTANCE)(
-  const EFI_DEVICE_PATH_PROTOCOL         *DevicePath
-  );
+    const EFI_DEVICE_PATH_PROTOCOL         *DevicePath
+);
  
 typedef struct {
     EFI_DEVICE_PATH_UTILS_GET_DEVICE_PATH_SIZE    GetDevicePathSize;
@@ -409,8 +411,8 @@ struct _EFI_SMBIOS_PROTOCOL {
     uint8_t MinorVersion;
 };
 typedef struct {
-  uint16_t Size : 14;
-  uint16_t Unit : 2;
+    uint16_t Size : 14;
+    uint16_t Unit : 2;
 } EXTENDED_BIOS_ROM_SIZE;
 
 #pragma pack(push,1)
@@ -435,16 +437,232 @@ typedef struct {
 } SMBIOS_TABLE_TYPE0;
 
 typedef struct {
-  EFI_SMBIOS_TABLE_HEADER Hdr;
-  uint8_t Manufacturer;
-  uint8_t ProductName;
-  uint8_t Version;
-  uint8_t SerialNumber;
-  efi_guid_t Uuid;
-  uint8_t WakeUpType; ///< The enumeration value from MISC_SYSTEM_WAKEUP_TYPE.
-  uint8_t SKUNumber;
-  uint8_t Family;
+    EFI_SMBIOS_TABLE_HEADER Hdr;
+    uint8_t Manufacturer;
+    uint8_t ProductName;
+    uint8_t Version;
+    uint8_t SerialNumber;
+    efi_guid_t Uuid;
+    uint8_t WakeUpType; ///< The enumeration value from MISC_SYSTEM_WAKEUP_TYPE.
+    uint8_t SKUNumber;
+    uint8_t Family;
 } SMBIOS_TABLE_TYPE1;
+
+/* pciio protocol */
+
+typedef struct _EFI_PCI_IO_PROTOCOL EFI_PCI_IO_PROTOCOL;
+
+typedef enum {
+    EfiPciIoWidthUint8 = 0,
+    EfiPciIoWidthUint16,
+    EfiPciIoWidthUint32,
+    EfiPciIoWidthUint64,
+    EfiPciIoWidthFifoUint8,
+    EfiPciIoWidthFifoUint16,
+    EfiPciIoWidthFifoUint32,
+    EfiPciIoWidthFifoUint64,
+    EfiPciIoWidthFillUint8,
+    EfiPciIoWidthFillUint16,
+    EfiPciIoWidthFillUint32,
+    EfiPciIoWidthFillUint64,
+    EfiPciIoWidthMaximum
+} EFI_PCI_IO_PROTOCOL_WIDTH;
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_POLL_IO_MEM)(
+    EFI_PCI_IO_PROTOCOL *This,
+    EFI_PCI_IO_PROTOCOL_WIDTH Width,
+    uint8_t BarIndex,
+    uint64_t Offset,
+    uint64_t Mask,
+    uint64_t Value,
+    uint64_t Delay,
+    uint64_t *Result
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_IO_MEM)(
+    EFI_PCI_IO_PROTOCOL *This,
+    EFI_PCI_IO_PROTOCOL_WIDTH Width,
+    uint8_t BarIndex,
+    uint64_t Offset,
+    uintn_t Count,
+    void *Buffer
+);
+
+typedef struct {
+    EFI_PCI_IO_PROTOCOL_IO_MEM Read;
+    EFI_PCI_IO_PROTOCOL_IO_MEM Write;
+} EFI_PCI_IO_PROTOCOL_ACCESS;
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_CONFIG)(
+    EFI_PCI_IO_PROTOCOL *This,
+    EFI_PCI_IO_PROTOCOL_WIDTH Width,
+    uint32_t Offset,
+    uintn_t Count,
+    void *Buffer
+);
+
+typedef struct {
+    EFI_PCI_IO_PROTOCOL_CONFIG Read;
+    EFI_PCI_IO_PROTOCOL_CONFIG Write;
+} EFI_PCI_IO_PROTOCOL_CONFIG_ACCESS;
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_COPY_MEM)(
+    EFI_PCI_IO_PROTOCOL *This,
+    EFI_PCI_IO_PROTOCOL_WIDTH Width,
+    uint8_t DestBarIndex,
+    uint64_t DestOffset,
+    uint8_t SrcBarIndex,
+    uint64_t SrcOffset,
+    uintn_t Count
+);
+
+typedef enum {
+    EfiPciIoOperationBusMasterRead,
+    EfiPciIoOperationBusMasterWrite,
+    EfiPciIoOperationBusMasterCommonBuffer,
+    EfiPciIoOperationMaximum
+} EFI_PCI_IO_PROTOCOL_OPERATION;
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_MAP)(
+    EFI_PCI_IO_PROTOCOL *This,
+    EFI_PCI_IO_PROTOCOL_OPERATION Operation,
+    void *HostAddress,
+    uintn_t *NumberOfBytes,
+    uint64_t *DeviceAddress,
+    void **Mapping
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_UNMAP)(
+    EFI_PCI_IO_PROTOCOL *This,
+    void *Mapping
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_ALLOCATE_BUFFER)(
+    EFI_PCI_IO_PROTOCOL *This,
+    efi_allocate_type_t Type,
+    efi_memory_type_t MemoryType,
+    uintn_t Pages,
+    void **HostAddress,
+    uint64_t Attributes
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_FREE_BUFFER)(
+    EFI_PCI_IO_PROTOCOL *This,
+    uintn_t Pages,
+    void *HostAddress
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_FLUSH)(
+    EFI_PCI_IO_PROTOCOL *This
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_GET_LOCATION)(
+    EFI_PCI_IO_PROTOCOL *This,
+    uintn_t *SegmentNumber,
+    uintn_t *BusNumber,
+    uintn_t *DeviceNumber,
+    uintn_t *FunctionNumber
+);
+
+typedef enum {
+    EfiPciIoAttributeOperationGet,
+    EfiPciIoAttributeOperationSet,
+    EfiPciIoAttributeOperationEnable,
+    EfiPciIoAttributeOperationDisable,
+    EfiPciIoAttributeOperationSupported,
+    EfiPciIoAttributeOperationMaximum
+} EFI_PCI_IO_PROTOCOL_ATTRIBUTE_OPERATION;
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_ATTRIBUTES)(
+    EFI_PCI_IO_PROTOCOL *This,
+    EFI_PCI_IO_PROTOCOL_ATTRIBUTE_OPERATION  Operation,
+    uint64_t Attributes,
+    uint64_t *Result
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_GET_BAR_ATTRIBUTES)(
+    EFI_PCI_IO_PROTOCOL *This,
+    uint8_t BarIndex,
+    uint64_t *Supports,
+    void **Resources
+);
+
+typedef uintn_t (EFIAPI *EFI_PCI_IO_PROTOCOL_SET_BAR_ATTRIBUTES)(
+    EFI_PCI_IO_PROTOCOL *This,
+    uint64_t Attributes,
+    uint8_t BarIndex,
+    uint64_t *Offset,
+    uint64_t *Length
+);
+
+struct _EFI_PCI_IO_PROTOCOL {
+    EFI_PCI_IO_PROTOCOL_POLL_IO_MEM           PollMem;
+    EFI_PCI_IO_PROTOCOL_POLL_IO_MEM           PollIo;
+    EFI_PCI_IO_PROTOCOL_ACCESS                Mem;
+    EFI_PCI_IO_PROTOCOL_ACCESS                Io;
+    EFI_PCI_IO_PROTOCOL_CONFIG_ACCESS         Pci;
+    EFI_PCI_IO_PROTOCOL_COPY_MEM              CopyMem;
+    EFI_PCI_IO_PROTOCOL_MAP                   Map;
+    EFI_PCI_IO_PROTOCOL_UNMAP                 Unmap;
+    EFI_PCI_IO_PROTOCOL_ALLOCATE_BUFFER       AllocateBuffer;
+    EFI_PCI_IO_PROTOCOL_FREE_BUFFER           FreeBuffer;
+    EFI_PCI_IO_PROTOCOL_FLUSH                 Flush;
+    EFI_PCI_IO_PROTOCOL_GET_LOCATION          GetLocation;
+    EFI_PCI_IO_PROTOCOL_ATTRIBUTES            Attributes;
+    EFI_PCI_IO_PROTOCOL_GET_BAR_ATTRIBUTES    GetBarAttributes;
+    EFI_PCI_IO_PROTOCOL_SET_BAR_ATTRIBUTES    SetBarAttributes;
+
+    uint64_t RomSize;
+
+    void    *RomImage;
+};
+
+/* pci */
+typedef struct {
+    uint16_t VendorId;
+    uint16_t DeviceId;
+    uint16_t Command;
+    uint16_t Status;
+    uint8_t RevisionID;
+    uint8_t ClassCode[3];
+    uint8_t CacheLineSize;
+    uint8_t LatencyTimer;
+    uint8_t HeaderType;
+    uint8_t BIST;
+} PCI_DEVICE_INDEPENDENT_REGION;
+
+typedef struct {
+    uint32_t Bar[6];
+    uint32_t CISPtr;
+    uint16_t SubsystemVendorID;
+    uint16_t SubsystemID;
+    uint32_t ExpansionRomBar;
+    uint8_t CapabilityPtr;
+    uint8_t Reserved1[3];
+    uint32_t Reserved2;
+    uint8_t InterruptLine;
+    uint8_t InterruptPin;
+    uint8_t MinGnt;
+    uint8_t MaxLat;
+} PCI_DEVICE_HEADER_TYPE_REGION;
+
+typedef struct {
+    PCI_DEVICE_INDEPENDENT_REGION Hdr;
+    PCI_DEVICE_HEADER_TYPE_REGION Device;
+} PCI_TYPE00;
+
+typedef struct {
+    uint8_t Desc;
+    uint16_t Len;
+    uint8_t ResType;
+    uint8_t GenFlag;
+    uint8_t SpecificFlag;
+    uint64_t AddrSpaceGranularity;
+    uint64_t AddrRangeMin;
+    uint64_t AddrRangeMax;
+    uint64_t AddrTranslationOffset;
+    uint64_t AddrLen;
+} EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR;
 
 #pragma pack(pop)
 

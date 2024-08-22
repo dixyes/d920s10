@@ -47,6 +47,7 @@ build_efi()
         "${POSIX_UEFI_PATH}/uefi/time.o"
 }
 
-build_efi tablesfix tablesfix.c
-build_efi readnor readnor.c
+# build_efi tablesfix tablesfix.c
+# build_efi readnor readnor.c
+build_efi sr358fv2 sr358fv2.c
 
