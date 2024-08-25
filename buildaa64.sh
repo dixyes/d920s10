@@ -49,5 +49,7 @@ build_efi()
 
 # build_efi tablesfix tablesfix.c
 # build_efi readnor readnor.c
+# build_efi showregs showregs.c rw.S
+build_efi gopfbwrite gopfbwrite.c
 build_efi sr358fv2 sr358fv2.c
 
