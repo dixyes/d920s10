@@ -30,6 +30,7 @@ const efi_guid_t pciio_proto_guid = EFI_PCI_IO_PROTOCOL_GUID;
 int main(int argc, char **argv) {
     efi_gop_t *gop;
     efi_status_t ret;
+    uint32_t *pPixel;
 
     ret = BS->LocateProtocol((void*)&gop_guid, NULL, (void **)&gop);
     if (EFI_SUCCESS != ret || NULL == gop) {
@@ -52,72 +53,33 @@ int main(int argc, char **argv) {
     printf("BlueMask: %08x\n", gop->Mode->Information->PixelInformation.BlueMask);
     printf("GreenMask: %08x\n", gop->Mode->Information->PixelInformation.GreenMask);
     printf("RedMask: %08x\n", gop->Mode->Information->PixelInformation.RedMask);
-    printf("Press enter key to write something...\n");
-    if (getchar() != '\r') {
-        return 1;
-    }
-
-    gop->Mode->MaxMode = 1;
-    gop->Mode->Mode = 0;
-    gop->Mode->Information->Version = 0;
-    gop->Mode->Information->PixelInformation.BlueMask = 0;
-    gop->Mode->Information->PixelInformation.GreenMask = 0;
-    gop->Mode->Information->PixelInformation.RedMask = 0;
-    gop->Mode->Information->PixelFormat = PixelRedGreenBlueReserved8BitPerColor;
-    gop->Mode->Information->PixelsPerScanLine = gop->Mode->Information->HorizontalResolution;
-
-    ret = BS->LocateProtocol((void*)&gop_guid, NULL, (void **)&gop);
-    if (EFI_SUCCESS != ret || NULL == gop) {
-        rprintf("failed LocateProtocol\n");
-        return 1;
-    }
-    printf("GOP: %p\n", gop);
-    printf("Mode: %p\n", gop->Mode);
-    printf("Mode->MaxMode: %d\n", gop->Mode->MaxMode);
-    printf("Mode->Mode: %d\n", gop->Mode->Mode);
-    printf("Version: %d\n", gop->Mode->Information->Version);
-    printf("FrameBufferBase: %p\n", gop->Mode->FrameBufferBase);
-    printf("FrameBufferSize: %08x\n", gop->Mode->FrameBufferSize);
-    printf("HorizontalResolution: %d\n", gop->Mode->Information->HorizontalResolution);
-    printf("VerticalResolution: %d\n", gop->Mode->Information->VerticalResolution);
-    printf("PixelsPerScanLine: %d\n", gop->Mode->Information->PixelsPerScanLine);
-    printf("PixelFormat: %08x\n", gop->Mode->Information->PixelFormat);
-    printf("BlueMask: %08x\n", gop->Mode->Information->PixelInformation.BlueMask);
-    printf("GreenMask: %08x\n", gop->Mode->Information->PixelInformation.GreenMask);
-    printf("RedMask: %08x\n", gop->Mode->Information->PixelInformation.RedMask);
-    printf("Press enter key to write something...\n");
-    if (getchar() != '\r') {
-        return 1;
-    }
-
-    uint32_t *pPixel = (void*)(uintptr_t)gop->Mode->FrameBufferBase;
-    for (int i = 0; i < gop->Mode->FrameBufferSize >> 2; i++) {
-        pPixel[i] = 0x66ccff00;
-    }
-
-    // printf("Prease press any key to continue...\n");
-    // getchar();
-
-    // // write something to fb + 0x80000000000
-    // pPixel = (void*)(0x80000000000LL + (uintptr_t)gop->Mode->FrameBufferBase);
+    // printf("Press enter key to write 0x66ccff00 to %p\n", gop->Mode->FrameBufferBase);
+    // if (getchar() != '\r') {
+    //     return 1;
+    // }
+    // pPixel = (void*)(uintptr_t)gop->Mode->FrameBufferBase;
     // for (int i = 0; i < gop->Mode->FrameBufferSize >> 2; i++) {
-    //     pPixel[i] = 0x10101010;
+    //     pPixel[i] = 0x66ccff00;
     // }
 
-    printf("Press enter key to exitbs...\n");
-    if (getchar() != '\r') {
-        return 1;
-    }
 
-    exit_bs();
-    for (int i = 0; i < gop->Mode->FrameBufferSize >> 2; i++) {
-        pPixel[i] = 0xff00ff00;
+    if (gop->Mode->FrameBufferBase < 0x80000000000LL) {
+        // printf("Press enter key to write 0xffcc6600 to %p\n", gop->Mode->FrameBufferBase);
+        // if (getchar() == '\r') {
+        //     pPixel = (void*)(0x80000000000LL + (uintptr_t)gop->Mode->FrameBufferBase);
+        //     for (int i = 0; i < gop->Mode->FrameBufferSize >> 2; i++) {
+        //         pPixel[i] = 0xffcc6600;
+        //     }
+        // } else {
+        //     printf("abort\n");
+        // }
+        pPixel = (void*)(0x80000000000LL + (uintptr_t)gop->Mode->FrameBufferBase);
+        printf("modify the frame buffer base to %p\n", pPixel);
+        gop->Mode->FrameBufferBase = (uint64_t)pPixel;
+        // printf("modify format to 0\n");
+        // gop->Mode->Information->PixelFormat = PixelRedGreenBlueReserved8BitPerColor;
+        printf("done\n");
     }
-    // write something to 0x80060000000
-    // pPixel = (void*)0x80060000000LL;
-    // for (int i = 0; i < gop->Mode->FrameBufferSize >> 2; i++) {
-    //     pPixel[i] = 0xf0f0f0f0;
-    // }
 
     return 0;
 }
