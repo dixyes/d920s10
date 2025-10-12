@@ -229,6 +229,7 @@ int set_fhd(efi_gop_t *gop) {
             (info->HorizontalResolution == 3840 && info->VerticalResolution == 2160 ) ||
             (info->HorizontalResolution == 2560 && info->VerticalResolution == 1600 ) ||
             (info->HorizontalResolution == 2560 && info->VerticalResolution == 1440 ) ||
+            (info->HorizontalResolution == 2240 && info->VerticalResolution == 1400 ) ||
             (info->HorizontalResolution == 1920 && info->VerticalResolution == 1080 ) ||
             (info->HorizontalResolution == 1280 && info->VerticalResolution == 720 ) ||
             0
