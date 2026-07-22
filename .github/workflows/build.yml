@@ -1,0 +1,34 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-aa64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld
+
+      - name: Build UEFI targets
+        run: |
+          make
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: d920s10-aa64-efi
+          path: |
+            *.efi
+            *.pdb
+            *.o
