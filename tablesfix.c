@@ -207,7 +207,7 @@ int set_fhd(efi_gop_t *gop) {
     uint64_t max_pixels = 0;
     uintn_t isiz = sizeof(efi_gop_mode_info_t);
     efi_gop_mode_info_t *info = NULL;
-    for (uintn_t try_mode = gop->Mode->MaxMode - 1; try_mode >= 0; try_mode--) {
+    for (intn_t try_mode = gop->Mode->MaxMode - 1; try_mode >= 0; try_mode--) {
         ret = gop->QueryMode(gop, try_mode, &isiz, &info);
         if (EFI_ERROR(ret) || info->PixelFormat > PixelBitMask) {
             // unsupported
@@ -249,7 +249,8 @@ int chainload_bootmgr() {
     const char_t *try_paths[] = {
         "\\EFI\\Microsoft\\Boot\\bootmgfw.efi",
         "\\EFI\\Microsoft\\Boot\\cdboot_noprompt.efi",
-        "\\EFI\\Microsoft\\Boot\\bootmgr.efi"
+        "\\EFI\\Microsoft\\Boot\\bootmgr.efi",
+        NULL
     };
 
     FILE *dummy;
@@ -534,6 +535,10 @@ int main(int argc, char **argv) {
         }
 
         sdt = (void*)&xsdt[1];
+        if (xsdt->Length < sizeof(*xsdt)) {
+            printf("ERROR: Invalid XSDT table length: %d.\n", xsdt->Length);
+            continue;
+        }
         for (uintn_t j = 0; j < (xsdt->Length - sizeof(*xsdt)) / 8; j++) {
             char bufSig[sizeof(sdt[0]->Signature) + 1] = {0};
             char bufOid[sizeof(sdt[0]->OemId) + 1] = {0};
@@ -611,7 +616,7 @@ int main(int argc, char **argv) {
     }  else if (!acpi_table) {
         yprintf("SKIPPED, cannot get ACPI Protocol\n");
     } else {
-        if (install_dbg2(acpi_table)) {
+        if (install_spcr(acpi_table)) {
             rprintf("FAILED\n");
         } else {
             gprintf("OK\n");
