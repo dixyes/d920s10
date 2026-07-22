@@ -6,7 +6,8 @@ PLATFORM_CFLAGS = \
 	-target arm64-unknown-windows \
     -ffreestanding \
     -fshort-wchar \
-    -mno-red-zone
+    -mno-red-zone \
+	-Wframe-larger-than=8192
 
 OPTIMIZE_CFLAGS = \
     -O3 -ffast-math \
@@ -26,7 +27,7 @@ PLATFORM_LDFLAGS = \
 	'-Wl,-subsystem:efi_application' \
 	-fuse-ld=lld-link
 
-LDFLAGS = $(PLATFORM_LDFLAGS)
+LDFLAGS = $(PLATFORM_LDFLAGS) -Wl,-DEBUG
 
 POSIX_UEFI_OBJS = \
 	posix-uefi/uefi/crt_aarch64.o \
