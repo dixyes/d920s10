@@ -1,0 +1,3 @@
+[submodule "posix-uefi"]
+	path = posix-uefi
+	url = ./posix-uefi
