@@ -47,7 +47,7 @@ size_t aml_node_size(const aml_node *node) {
         case AML_OPCODE_IfOp:
             // 0xa0, ?b pkglength, ?b cond, ?b terms
             /* fallthrough */
-        
+
             // container nodes
             // pkglength
             if (size < 63) {

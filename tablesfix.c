@@ -68,7 +68,7 @@ static int install_dbg2 (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
 
 static int install_spcr (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     uintn_t table_key;
-    
+
     EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE Spcr = {
         ARM_ACPI_HEADER ( 0x52435053 /* EFI_ACPI_6_2_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_SIGNATURE, "SPCR" in le */,
                         EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE,
@@ -147,7 +147,7 @@ static int uinstall_pcct(EFI_ACPI_TABLE_PROTOCOL *acpi_table, EFI_ACPI_SDT_PROTO
             printf("uninstall PCCT at %d\n", i);
 
             // pTable->Signature = 0x584d454f;
-            
+
             ret = acpi_table->UninstallAcpiTable(acpi_table, key);
             if (EFI_SUCCESS != ret) {
                 printf("failed UninstallAcpiTable PCCT\n");
@@ -161,7 +161,7 @@ static int uinstall_pcct(EFI_ACPI_TABLE_PROTOCOL *acpi_table, EFI_ACPI_SDT_PROTO
 
 static int set_fhd(efi_gop_t *gop) {
     efi_status_t ret;
-    
+
     uint64_t max_pixels = 0;
     uintn_t isiz = sizeof(efi_gop_mode_info_t);
     efi_gop_mode_info_t *info = NULL;
@@ -245,7 +245,7 @@ static int chainload_bootmgr() {
         printf("failed LocateProtocol EFI_DEVICE_PATH_TO_TEXT_PROTOCOL: %d\n", ret);
         return 1;
     }
-    
+
     const efi_guid_t dpupGuid = EFI_DEVICE_PATH_UTILITIES_PROTOCOL_GUID;
     EFI_DEVICE_PATH_UTILITIES_PROTOCOL *dpup;
     ret = BS->LocateProtocol((void*)&dpupGuid, NULL, (void**)&dpup);
