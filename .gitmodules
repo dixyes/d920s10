@@ -1,3 +1,9 @@
 [submodule "posix-uefi"]
 	path = posix-uefi
 	url = https://gitlab.com/bztsrc/posix-uefi.git
+[submodule "uACPI"]
+	path = uACPI
+	url = https://github.com/uACPI/uACPI
+[submodule "lai"]
+	path = lai
+	url = https://github.com/managarm/lai

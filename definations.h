@@ -1,4 +1,28 @@
+#ifndef _DEFINATIONS_H
+#define _DEFINATIONS_H
+
 #include <uefi.h>
+
+// debug printfs
+#define white() ST->ConOut->SetAttribute(ST->ConOut, EFI_RED | EFI_GREEN | EFI_BLUE)
+#define bright() ST->ConOut->SetAttribute(ST->ConOut, EFI_WHITE)
+#define yellow() ST->ConOut->SetAttribute(ST->ConOut, EFI_YELLOW)
+#define red() ST->ConOut->SetAttribute(ST->ConOut, EFI_RED | EFI_BRIGHT)
+#define green() ST->ConOut->SetAttribute(ST->ConOut, EFI_GREEN | EFI_BRIGHT)
+#define yprintf(fmt, ...) do {\
+    yellow(); printf(fmt, ##__VA_ARGS__); white(); \
+} while (0)
+#define rprintf(fmt, ...) do {\
+    red(); printf(fmt, ##__VA_ARGS__); white(); \
+} while (0)
+#define gprintf(fmt, ...) do {\
+    green(); printf(fmt, ##__VA_ARGS__); white(); \
+} while (0)
+#define brprintf(fmt, ...) do {\
+    bright(); printf(fmt, ##__VA_ARGS__); white(); \
+} while (0)
+
+// definations missing in posix-uefi
 
 #define EFI_ACPI_2_0_ROOT_SYSTEM_DESCRIPTION_POINTER_REVISION 0x02
 
@@ -103,7 +127,6 @@ typedef struct {
     uint32_t OffsetDbgDeviceInfo;
     uint32_t NumberDbgDeviceInfo;
 } EFI_ACPI_DEBUG_PORT_2_DESCRIPTION_TABLE;
-const int a=sizeof(EFI_ACPI_DEBUG_PORT_2_DESCRIPTION_TABLE);
 
 typedef struct {
     uint8_t AddressSpaceId;
@@ -440,3 +463,21 @@ typedef struct {
 
 #pragma pack(pop)
 
+#define EFI_HOB_LIST_GUID \
+  { \
+    0x7739f24c, 0x93d7, 0x11d4, {0x9a, 0x3a, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d} \
+  }
+// from edk2/MdePkg/Include/Pi/PiHob.h
+#define EFI_HOB_TYPE_HANDOFF        0x0001
+#define EFI_HOB_TYPE_GUID_EXTENSION 0x0004
+typedef struct {
+  uint16_t    HobType;
+  uint16_t    HobLength;
+  uint32_t    Reserved;
+} EFI_HOB_GENERIC_HEADER;
+typedef struct {
+  EFI_HOB_GENERIC_HEADER    Header;
+  efi_guid_t                  Name;
+} EFI_HOB_GUID_TYPE;
+
+#endif // _DEFINATIONS_H
