@@ -12,18 +12,18 @@ or save it to EFI\BOOT\bootaa64.efi to chainload
 
 ## Build
 
-this depends on [POSIX-UEFI](https://gitlab.com/bztsrc/posix-uefi), build it first, then
-
 ```bash
-POSIX_UEFI_PATH=<path to posix-uefi> ./buildaa64.sh
+git clone --recursive (this repo) d920s10
+cd d920s10
+make
 ```
 
 ## Details
 
 0. Added DBG2 and SPCR for debug
 1. PCCT table is corrupt, removed
-2. RTC0 missing _HID, patched with ssdt, source is in fix-rtc0-hid.dsl
-3. DDRC DDR2 and DDR3 make linux hisi_pmu stuck, removed via ssdt, source is in remove-ddrc.dsl
+2. RTC0 missing _HID, patched with ssdt
+3. Offline DDRCs make linux hisi_pmu stuck (can be disabled by kernel param `initcall_blacklist=hisi_ddrc_pmu_module_init`), removed via ssdt
 4. I have not found any gpu with win aa64 drivers, so use gop resolution changed it
 5. When not invoked from cli, it chainloads bootmgr
 
