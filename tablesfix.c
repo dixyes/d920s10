@@ -162,27 +162,18 @@ static int uinstall_pcct(EFI_ACPI_TABLE_PROTOCOL *acpi_table, EFI_ACPI_SDT_PROTO
 static int set_fhd(efi_gop_t *gop) {
     efi_status_t ret;
 
-    uint64_t max_pixels = 0;
-    uintn_t isiz = sizeof(efi_gop_mode_info_t);
-    efi_gop_mode_info_t *info = NULL;
+    uint64_t max_pixels = 0, max_prefered_pixels = 0;
+    uintn_t isiz;
+    efi_gop_mode_info_t *info;
+    intn_t max_mode = -1, prefered_mode = -1;
     for (intn_t try_mode = gop->Mode->MaxMode - 1; try_mode >= 0; try_mode--) {
+        info = NULL;
+        isiz = sizeof(efi_gop_mode_info_t);
         ret = gop->QueryMode(gop, try_mode, &isiz, &info);
         if (EFI_ERROR(ret) || info->PixelFormat > PixelBitMask) {
-            // unsupported
-            continue;
+            goto next;
         }
 
-        if (info->VerticalResolution * info->HorizontalResolution <= max_pixels){
-            continue;
-        }
-        max_pixels = info->VerticalResolution * info->HorizontalResolution;
-
-        printf("setting to %d: %dx%d\n", try_mode, info->HorizontalResolution, info->VerticalResolution);
-        ret = gop->SetMode(gop, try_mode);
-        if (EFI_ERROR(ret)) {
-            fprintf(stderr, "unable to set video mode: %d\n", ret);
-            return 1;
-        }
         if (
             (info->HorizontalResolution == 3840 && info->VerticalResolution == 2160 ) ||
             (info->HorizontalResolution == 2560 && info->VerticalResolution == 1600 ) ||
@@ -193,8 +184,39 @@ static int set_fhd(efi_gop_t *gop) {
             0
         ) {
             // prefered
-            break;
+            if (info->VerticalResolution * info->HorizontalResolution > max_prefered_pixels) {
+                max_prefered_pixels = info->VerticalResolution * info->HorizontalResolution;
+                prefered_mode = try_mode;
+            }
         }
+
+        if (info->VerticalResolution * info->HorizontalResolution <= max_pixels){
+            // smaller than previous, skip
+            goto next;
+        }
+
+        max_pixels = info->VerticalResolution * info->HorizontalResolution;
+        max_mode = try_mode;
+next:
+        if (info) {
+            BS->FreePool(info);
+        }
+    }
+
+    intn_t final_mode = prefered_mode != -1 ? prefered_mode : max_mode;
+    if (final_mode < 0) {
+        fprintf(stderr, "set_fhd: no valid video mode found\n");
+        return 1;
+    }
+
+    printf(
+        "set_fhd: setting to mode %d\n",
+        final_mode
+    );
+    ret = gop->SetMode(gop, final_mode);
+    if (EFI_ERROR(ret)) {
+        fprintf(stderr, "set_fhd: unable to set video mode: %d\n", ret);
+        return 1;
     }
     return 0;
 }
