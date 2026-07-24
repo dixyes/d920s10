@@ -4,6 +4,3 @@
 [submodule "uACPI"]
 	path = uACPI
 	url = https://github.com/uACPI/uACPI
-[submodule "lai"]
-	path = lai
-	url = https://github.com/managarm/lai
