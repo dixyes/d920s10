@@ -1,47 +1,15 @@
 #include "definations.h"
 
-const char rtc0_hid[] = {
-  0x53, 0x53, 0x44, 0x54, 0x59, 0x00, 0x00, 0x00, 0x02, 0x7f, 0x44, 0x49,
-  0x58, 0x59, 0x45, 0x53, 0x52, 0x54, 0x43, 0x30, 0x5f, 0x48, 0x49, 0x44,
-  0x00, 0x00, 0x00, 0x00, 0x49, 0x4e, 0x54, 0x4c, 0x28, 0x06, 0x23, 0x20,
-  0xa0, 0x14, 0x00, 0x15, 0x5c, 0x2f, 0x03, 0x5f, 0x53, 0x42, 0x5f, 0x49,
-  0x32, 0x43, 0x34, 0x52, 0x54, 0x43, 0x30, 0x06, 0x00, 0x10, 0x1f, 0x5c,
-  0x2f, 0x03, 0x5f, 0x53, 0x42, 0x5f, 0x49, 0x32, 0x43, 0x34, 0x52, 0x54,
-  0x43, 0x30, 0x08, 0x5f, 0x48, 0x49, 0x44, 0x0d, 0x44, 0x49, 0x58, 0x59,
-  0x30, 0x30, 0x30, 0x30, 0x00
-};
+#include "dsdt_fix.h"
 
-const char remove_ddrc[] = {
-  0x53, 0x53, 0x44, 0x54, 0x65, 0x00, 0x00, 0x00, 0x02, 0x44, 0x44, 0x49,
-  0x58, 0x59, 0x45, 0x53, 0x52, 0x45, 0x4d, 0x44, 0x44, 0x52, 0x43, 0x20,
-  0x00, 0x00, 0x00, 0x00, 0x49, 0x4e, 0x54, 0x4c, 0x28, 0x06, 0x23, 0x20,
-  0xa0, 0x1c, 0x00, 0x15, 0x5c, 0x2e, 0x5f, 0x53, 0x42, 0x5f, 0x44, 0x44,
-  0x52, 0x32, 0x06, 0x00, 0x15, 0x5c, 0x2e, 0x5f, 0x53, 0x42, 0x5f, 0x44,
-  0x44, 0x52, 0x33, 0x06, 0x00, 0x10, 0x11, 0x5c, 0x2e, 0x5f, 0x53, 0x42,
-  0x5f, 0x44, 0x44, 0x52, 0x32, 0x08, 0x5f, 0x53, 0x54, 0x41, 0x00, 0x10,
-  0x11, 0x5c, 0x2e, 0x5f, 0x53, 0x42, 0x5f, 0x44, 0x44, 0x52, 0x33, 0x08,
-  0x5f, 0x53, 0x54, 0x41, 0x00
-};
+static const efi_guid_t acpi_guid = ACPI_TABLE_GUID;
+static const efi_guid_t acpi2_guid = ACPI_20_TABLE_GUID;
+static const efi_guid_t gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+static const efi_guid_t acpi_proto_guid = EFI_ACPI_TABLE_PROTOCOL_GUID;
+static const efi_guid_t acpi_sdt_guid = EFI_ACPI_SDT_PROTOCOL_GUID;
+static const efi_guid_t smbios_guid = EFI_SMBIOS_PROTOCOL_GUID;
 
-const char w510[] = {
-  0x53, 0x53, 0x44, 0x54, 0xaa, 0x00, 0x00, 0x00, 0x02, 0xeb, 0x44, 0x49,
-  0x58, 0x59, 0x45, 0x53, 0x44, 0x49, 0x58, 0x59, 0x45, 0x53, 0x30, 0x32,
-  0x00, 0x00, 0x00, 0x00, 0x49, 0x4e, 0x54, 0x4c, 0x28, 0x06, 0x23, 0x20,
-  0xa0, 0x33, 0x00, 0x15, 0x5c, 0x2f, 0x03, 0x5f, 0x53, 0x42, 0x5f, 0x49,
-  0x32, 0x43, 0x30, 0x43, 0x4f, 0x4d, 0x31, 0x06, 0x00, 0x15, 0x5c, 0x2f,
-  0x03, 0x5f, 0x53, 0x42, 0x5f, 0x53, 0x50, 0x49, 0x30, 0x43, 0x4f, 0x4d,
-  0x32, 0x06, 0x00, 0x15, 0x5c, 0x2e, 0x5f, 0x53, 0x42, 0x5f, 0x57, 0x49,
-  0x46, 0x49, 0x06, 0x00, 0x10, 0x1f, 0x5c, 0x2f, 0x03, 0x5f, 0x53, 0x42,
-  0x5f, 0x49, 0x32, 0x43, 0x30, 0x43, 0x4f, 0x4d, 0x31, 0x08, 0x5f, 0x48,
-  0x49, 0x44, 0x0d, 0x44, 0x49, 0x58, 0x59, 0x30, 0x30, 0x30, 0x31, 0x00,
-  0x10, 0x1f, 0x5c, 0x2f, 0x03, 0x5f, 0x53, 0x42, 0x5f, 0x53, 0x50, 0x49,
-  0x30, 0x43, 0x4f, 0x4d, 0x32, 0x08, 0x5f, 0x48, 0x49, 0x44, 0x0d, 0x44,
-  0x49, 0x58, 0x59, 0x30, 0x30, 0x30, 0x32, 0x00, 0x10, 0x11, 0x5c, 0x2e,
-  0x5f, 0x53, 0x42, 0x5f, 0x57, 0x49, 0x46, 0x49, 0x08, 0x5f, 0x53, 0x54,
-  0x41, 0x00
-};
-
-int install_dbg2 (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
+static int install_dbg2 (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     uintn_t table_key;
 
     EFI_ACPI_DEBUG_PORT_2_TABLE Dbg2 = {
@@ -98,7 +66,7 @@ int install_dbg2 (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     return 0;
 }
 
-int install_spcr (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
+static int install_spcr (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     uintn_t table_key;
     
     EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE Spcr = {
@@ -160,17 +128,7 @@ int install_spcr (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     return 0;
 }
 
-int install_ssdt (EFI_ACPI_TABLE_PROTOCOL *acpi_table, const char *ssdt, size_t s) {
-    uintn_t table_key;
-
-    efi_status_t ret = acpi_table->InstallAcpiTable(acpi_table, (void *)ssdt, s, &table_key);
-    if (EFI_SUCCESS != ret) {
-        return 1;
-    }
-    return 0;
-}
-
-int uinstall_pcct(EFI_ACPI_TABLE_PROTOCOL *acpi_table, EFI_ACPI_SDT_PROTOCOL *acpi_sdt) {
+static int uinstall_pcct(EFI_ACPI_TABLE_PROTOCOL *acpi_table, EFI_ACPI_SDT_PROTOCOL *acpi_sdt) {
     efi_status_t ret;
     EFI_ACPI_SDT_HEADER *pTable = NULL;
     EFI_ACPI_TABLE_VERSION dummy;
@@ -201,7 +159,7 @@ int uinstall_pcct(EFI_ACPI_TABLE_PROTOCOL *acpi_table, EFI_ACPI_SDT_PROTOCOL *ac
     return 0;
 }
 
-int set_fhd(efi_gop_t *gop) {
+static int set_fhd(efi_gop_t *gop) {
     efi_status_t ret;
     
     uint64_t max_pixels = 0;
@@ -241,7 +199,7 @@ int set_fhd(efi_gop_t *gop) {
     return 0;
 }
 
-int chainload_bootmgr() {
+static int chainload_bootmgr() {
     efi_status_t ret;
 
     printf("chainload bootmgr\n");
@@ -348,7 +306,7 @@ int chainload_bootmgr() {
 }
 
 // from util-linux
-char *dmi_string(const EFI_SMBIOS_TABLE_HEADER *dm, uint8_t s)
+static char *dmi_string(const EFI_SMBIOS_TABLE_HEADER *dm, uint8_t s)
 {
 	char *bp = (char *)dm;
 
@@ -365,31 +323,6 @@ char *dmi_string(const EFI_SMBIOS_TABLE_HEADER *dm, uint8_t s)
 	return !*bp ? NULL : bp;
 }
 
-const efi_guid_t acpi_guid = ACPI_TABLE_GUID;
-const efi_guid_t acpi2_guid = ACPI_20_TABLE_GUID;
-const efi_guid_t gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
-const efi_guid_t acpi_proto_guid = EFI_ACPI_TABLE_PROTOCOL_GUID;
-const efi_guid_t acpi_sdt_guid = EFI_ACPI_SDT_PROTOCOL_GUID;
-const efi_guid_t smbios_guid = EFI_SMBIOS_PROTOCOL_GUID;
-
-#define white() ST->ConOut->SetAttribute(ST->ConOut, EFI_RED | EFI_GREEN | EFI_BLUE)
-#define bright() ST->ConOut->SetAttribute(ST->ConOut, EFI_WHITE)
-#define yellow() ST->ConOut->SetAttribute(ST->ConOut, EFI_YELLOW)
-#define red() ST->ConOut->SetAttribute(ST->ConOut, EFI_RED | EFI_BRIGHT)
-#define green() ST->ConOut->SetAttribute(ST->ConOut, EFI_GREEN | EFI_BRIGHT)
-#define yprintf(fmt, ...) do {\
-    yellow(); printf(fmt, ##__VA_ARGS__); white(); \
-} while (0)
-#define rprintf(fmt, ...) do {\
-    red(); printf(fmt, ##__VA_ARGS__); white(); \
-} while (0)
-#define gprintf(fmt, ...) do {\
-    green(); printf(fmt, ##__VA_ARGS__); white(); \
-} while (0)
-#define brprintf(fmt, ...) do {\
-    bright(); printf(fmt, ##__VA_ARGS__); white(); \
-} while (0)
-
 
 int main(int argc, char **argv) {
     efi_status_t ret;
@@ -403,7 +336,7 @@ int main(int argc, char **argv) {
     boolean_t has_spcr = 0;
     boolean_t has_dbg2 = 0;
     boolean_t is_w510 = 0;
-    
+
     EFI_SMBIOS_HANDLE smbios_handle;
     EFI_SMBIOS_TYPE smbios_type;
     EFI_SMBIOS_TABLE_HEADER *smbios_table;
@@ -580,7 +513,7 @@ int main(int argc, char **argv) {
     if (cpus > 1) {
         yprintf("SKIPPED, have more cpus: %d\n", cpus);
     } else if (!has_pcct) {
-        yprintf("SKIPPED, not work for W510\n");
+        yprintf("SKIPPED, not exist\n");
     } else if (!acpi_table) {
         yprintf("SKIPPED, cannot get ACPI Protocol\n");
     } else if (!acpi_sdt) {
@@ -623,35 +556,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    brprintf("(Windows) Add _HID for RTC0\n");
+    brprintf("(*) DSDT fixes\n");
     if (!acpi_table) {
         yprintf("SKIPPED, cannot get ACPI Protocol\n");
     } else {
-        if (install_ssdt(acpi_table, rtc0_hid, sizeof(rtc0_hid))) {
-            rprintf("FAILED\n");
-        } else {
-            gprintf("OK\n");
-        }
-    }
-
-    brprintf("(Linux) Remove DDRC DDR2 DDR3\n");
-    if (!acpi_table) {
-        yprintf("SKIPPED, cannot get ACPI Protocol\n");
-    } else {
-        if (install_ssdt(acpi_table, remove_ddrc, sizeof(remove_ddrc))) {
-            rprintf("FAILED\n");
-        } else {
-            gprintf("OK\n");
-        }
-    }
-
-    brprintf("(Windows) W510 specific patch\n");
-    if (!acpi_table) {
-        yprintf("SKIPPED, cannot get ACPI Protocol\n");
-    } else if (!is_w510) {
-        yprintf("SKIPPED: not W510\n");
-    } else {
-        if (install_ssdt(acpi_table, w510, sizeof(w510))) {
+        if (fix_dsdt(acpi_table)) {
             rprintf("FAILED\n");
         } else {
             gprintf("OK\n");

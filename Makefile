@@ -40,7 +40,7 @@ POSIX_UEFI_OBJS = \
 	$(POSIX_UEFI_PATH)/uefi/string.o
 
 .PHONY: all
-all: posix-uefi tablesfix.efi readnor.efi
+all: posix-uefi uacpi tablesfix.efi readnor.efi
 
 .PHONY: posix-uefi
 posix-uefi:
@@ -102,13 +102,10 @@ $(UACPI_PATH)/source/%.o: $(UACPI_PATH)/source/%.c uacpi_platform.h
 uacpi-clean:
 	rm -f $(UACPI_OBJS)
 
-tablesfix.efi: tablesfix.o $(POSIX_UEFI_OBJS)
+tablesfix.efi: tablesfix.o dsdt_fix.o hob.o aml.o uacpi_kernel.o $(POSIX_UEFI_OBJS) $(UACPI_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 readnor.efi: readnor.o $(POSIX_UEFI_OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@
-
-dyn.efi: dsdt_fix.o hob.o aml.o uacpi_kernel.o $(POSIX_UEFI_OBJS) $(UACPI_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 .PHONY: clean
