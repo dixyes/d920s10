@@ -1,7 +1,7 @@
 
 // minimal AML serialization implementation for dynamic SSDT generation
 
-#include "definations.h"
+#include "definitions.h"
 #include "aml.h"
 
 size_t aml_node_size(const aml_node *node) {

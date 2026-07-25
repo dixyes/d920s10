@@ -1,4 +1,4 @@
-#include "definations.h"
+#include "definitions.h"
 
 #include "dsdt_fix.h"
 

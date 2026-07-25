@@ -1,5 +1,5 @@
 
-#include "definations.h"
+#include "definitions.h"
 #include "hob.h"
 
 static const efi_guid_t hob_list_guid = EFI_HOB_LIST_GUID;

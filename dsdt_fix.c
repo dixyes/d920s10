@@ -9,7 +9,7 @@
 #include "uacpi/utilities.h"
 #pragma pop_macro("_MSC_VER")
 
-#include "definations.h"
+#include "definitions.h"
 #include "hob.h"
 #include "aml.h"
 #include "dsdt_fix.h"
