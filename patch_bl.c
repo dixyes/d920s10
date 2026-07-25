@@ -45,17 +45,20 @@ const search_pattern stub_patterns[] = {
     EMPTY_PATTERN
 };
 
-const search_pattern init_pattern = {
-    (const char[]){
-        // 0x00, 0x00, 0x90, 0xD2, // mov     x0, 0x8000
-        // 0x20, 0x00, 0xA0, 0xF2, // movk    x0, 1, lsl 16
-        // 0x20, 0x13, 0x1E, 0xD5, // msr     MDCR_EL3, x0
-        0xFF, 0x44, 0x03, 0xD5, // msr     DAIFClr, 4
-        0x00, 0x00, 0x80, 0xD2, // mov     x0, 0 -> will be replaced call to stub
-        0x40, 0x11, 0x1E, 0xD5 // msr     CPTR_EL3, x0
+const search_pattern init_pattern[] = {
+    {
+        (const char[]){
+            // 0x00, 0x00, 0x90, 0xD2, // mov     x0, 0x8000
+            // 0x20, 0x00, 0xA0, 0xF2, // movk    x0, 1, lsl 16
+            // 0x20, 0x13, 0x1E, 0xD5, // msr     MDCR_EL3, x0
+            0xFF, 0x44, 0x03, 0xD5, // msr     DAIFClr, 4
+            0x00, 0x00, 0x80, 0xD2, // mov     x0, 0 -> will be replaced call to stub
+            0x40, 0x11, 0x1E, 0xD5 // msr     CPTR_EL3, x0
+        },
+        NULL,
+        12
     },
-    NULL,
-    12
+    EMPTY_PATTERN,
 };
 
 const char stub_text[] = {
@@ -120,15 +123,6 @@ int patch_el3(size_t size, char *buf) {
 
     printf("BL31 entry found at offset 0x%08lx, size 0x%08lx\n", bl31_entry->file_offset, bl31_entry->file_size);
 
-    // find init sequence in BL31 image
-    char *init_start = search_pattern_in_buffer(&init_pattern, buf + bl31_entry->file_offset, bl31_entry->file_size);
-    if (!init_start) {
-        yprintf("Init pattern not found in BL31 image\n");
-        ret = 1;
-        goto end;
-    }
-    printf("Found init pattern at offset 0x%08lx\n", init_start - buf);
-
     // find pattern for storing stub
     const search_pattern *stub_pattern = NULL;
     char *stub_start = NULL;
@@ -150,13 +144,31 @@ int patch_el3(size_t size, char *buf) {
     stub_start = buf + bl31_entry->file_offset + (((stub_start - (buf + bl31_entry->file_offset)) + 3) & ~3);
     printf("Aligned stub start to offset 0x%08lx\n", stub_start - buf);
 
-    // generate bl instruction to call stub
-    // BL is at init_start + 4, offset is relative to BL's PC
-    intptr_t bl_offset = (stub_start - (init_start + 4)) / 4;
-    uint32_t bl_instr = 0x94000000 | (bl_offset & 0x3FFFFFF);
 
-    // patch init sequence to call stub
-    memcpy(init_start + 4, &bl_instr, sizeof(bl_instr));
+    int patched = 0;
+    while (true) {
+        // find init sequence in BL31 image
+        char *init_start = search_pattern_in_buffer(init_pattern, buf + bl31_entry->file_offset, bl31_entry->file_size);
+        if (!init_start) {
+            if (!patched) {
+                yprintf("Init pattern not found in BL31 image\n");
+                ret = 1;
+                break;
+            } else {
+                ret = 0;
+                break;
+            }
+        }
+        printf("Found init pattern at offset 0x%08lx\n", init_start - buf);
+
+        // generate bl instruction to call stub
+        // BL is at init_start + 4, offset is relative to BL's PC
+        intptr_t bl_offset = (stub_start - (init_start + 4)) / 4;
+        uint32_t bl_instr = 0x94000000 | (bl_offset & 0x3FFFFFF);
+
+        // patch init sequence to call stub
+        memcpy(init_start + 4, &bl_instr, sizeof(bl_instr));
+    }
 
     // copy stub code to stub_start
     memcpy(stub_start, stub_text, sizeof(stub_text));
