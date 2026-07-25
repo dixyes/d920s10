@@ -2,6 +2,7 @@
 POSIX_UEFI_PATH = posix-uefi
 UACPI_PATH = uACPI
 CC = clang
+HOST_CC = clang
 
 PLATFORM_CFLAGS = \
 	-target arm64-unknown-windows \
@@ -22,6 +23,9 @@ INCLUDES = \
 	-I$(UACPI_PATH)/include
 
 CFLAGS = $(PLATFORM_CFLAGS) $(OPTIMIZE_CFLAGS) $(LINT_CFLAGS) $(INCLUDES)
+
+HOST_CFLAGS = \
+	-Wall
 
 PLATFORM_LDFLAGS = \
 	-target arm64-unknown-windows \
@@ -107,6 +111,9 @@ tablesfix.efi: tablesfix.o dsdt_fix.o hob.o aml.o uacpi_kernel.o $(POSIX_UEFI_OB
 
 readnor.efi: readnor.o $(POSIX_UEFI_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
+
+patch_bl: patch_bl.c
+	$(HOST_CC) $(HOST_CFLAGS) -o $@ $<
 
 .PHONY: clean
 clean: posix-uefi-clean uacpi-clean
