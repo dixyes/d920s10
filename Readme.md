@@ -27,6 +27,21 @@ make
 4. I have not found any gpu with win aa64 drivers, so use gop resolution changed it
 5. When not invoked from cli, it chainloads bootmgr
 
+## MPAM
+
+arm8.2 adds MPAM (Memory Partitioning and Monitoring) support, Hi1620 supports MPAMv1.0, but BL31 does not initialize it, so Linux kernel (since 6.13) will fail to boot very early. The patch_bl tool can patch firmware to initialize MPAM, and then OS can boot normally.
+
+**The patch is ABSOLUTELY NO WARRANTY,**
+
+**USE AT YOUR OWN RISK**
+
+```bash
+# yet only for little-endian linux
+make patch_bl
+./patch_bl programmer_dump.bin patched.bin
+# flash back patched.bin to SPI flash
+```
+
 ## License
 
 ```text

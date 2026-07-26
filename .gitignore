@@ -1,6 +1,7 @@
 *.o
 *.efi
 *.pdb
+patch_bl
 
 *.aml
 

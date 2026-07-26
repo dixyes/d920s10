@@ -117,4 +117,4 @@ patch_bl: patch_bl.c
 
 .PHONY: clean
 clean: posix-uefi-clean uacpi-clean
-	rm -f *.o *.efi
+	rm -f *.o *.efi patch_bl

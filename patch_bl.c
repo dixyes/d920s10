@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <sys/sendfile.h>
 
-#define yprintf(fmt, ...) fprintf(stderr, "\033[1;36m" fmt "\033[0m", ##__VA_ARGS__)
+#define yprintf(fmt, ...) fprintf(stderr, "\033[1;33m" fmt "\033[0m", ##__VA_ARGS__)
 #define gprintf(fmt, ...) fprintf(stdout, "\033[1;32m" fmt "\033[0m", ##__VA_ARGS__)
 #endif
 
@@ -160,6 +160,7 @@ int patch_el3(size_t size, char *buf) {
             }
         }
         printf("Found init pattern at offset 0x%08lx\n", init_start - buf);
+        patched = 1;
 
         // generate bl instruction to call stub
         // BL is at init_start + 4, offset is relative to BL's PC
@@ -201,8 +202,8 @@ int main (int argc, char **argv) {
     }
 
     for (int i = 0; i < 3; i++) {
-        fprintf(stderr, "This patch is ABSOLUTELY NO WARRANTY\n");
-        fprintf(stderr, "AT YOUR OWN RISK\n");
+        fprintf(stderr, "\033[31mThis patch is ABSOLUTELY NO WARRANTY\033[0m\n");
+        fprintf(stderr, "\033[31mUSE AT YOUR OWN RISK\033[0m\n");
         sleep(1);
     }
 
@@ -268,6 +269,8 @@ int main (int argc, char **argv) {
         perror("copy remaining input file to output file");
         goto end;
     }
+
+    printf("Patch successful, output file %s created\n", argv[2]);
 
     ret = 0;
 end:
