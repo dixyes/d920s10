@@ -96,56 +96,53 @@ void uacpi_kernel_release_mutex(uacpi_handle handle) {
     // do nothing
 }
 
+static void *arena = NULL;
 static tlsf_t uacpi_kernel_tlsf;
 
 #define UACPI_KERNEL_ARENA_SIZE (64 * 1024 * 1024) // 64 MB
 
-uacpi_status uacpi_kernel_initialize(uacpi_init_level current_init_lvl) {
-    (void)current_init_lvl;
+static int init_arena_once(void) {
+    if (uacpi_kernel_tlsf)
+        return 0;
 
-    if (uacpi_kernel_tlsf) {
-        return UACPI_STATUS_OK;
-    }
-    
-    void *arena = NULL;
-
-    // prepare arena for uACPI alloc
     efi_status_t ret = BS->AllocatePool(
-        EfiBootServicesData,
-        UACPI_KERNEL_ARENA_SIZE,
-        (void**)&arena
-    );
+        EfiBootServicesData, UACPI_KERNEL_ARENA_SIZE, (void**)&arena);
     if (ret != EFI_SUCCESS) {
-        return UACPI_STATUS_DENIED;
+        printf("uACPI: AllocatePool(%lu MB) FAILED ret=%lu\n",
+               (unsigned long)(UACPI_KERNEL_ARENA_SIZE / 1024 / 1024), (unsigned long)ret);
+        return -1;
     }
 
     uacpi_kernel_tlsf = tlsf_create_with_pool(arena, UACPI_KERNEL_ARENA_SIZE);
+    if (!uacpi_kernel_tlsf) {
+        printf("uACPI: tlsf_create_with_pool FAILED\n");
+        return -1;
+    }
 
-    return UACPI_STATUS_OK;
+    return 0;
+}
+
+uacpi_status uacpi_kernel_initialize(uacpi_init_level current_init_lvl) {
+    (void)current_init_lvl;
+    return init_arena_once() == 0 ? UACPI_STATUS_OK : UACPI_STATUS_OUT_OF_MEMORY;
 }
 
 void uacpi_kernel_deinitialize(void) {
     tlsf_destroy(uacpi_kernel_tlsf);
+    uacpi_kernel_tlsf = NULL;
 
-    void *arena = tlsf_get_pool(uacpi_kernel_tlsf);
-
-    // prepare arena for uACPI alloc
-    // printf("freeing with size: %ld\n", uacpi_kernel_arena_next_offset);
     efi_status_t ret = BS->FreePool(arena);
     if (ret != EFI_SUCCESS) {
         printf("uACPI kernel deinitialize failed to free arena: %d\n", ret);
     }
+    arena = NULL;
 }
 
-// void *uacpi_kernel_alloc_zeroed(uacpi_size size) {
-//     void *ptr = tlsf_malloc(uacpi_kernel_tlsf, size);
-//     if (ptr) {
-//         memset(ptr, 0, size);
-//     }
-//     return ptr;
-// }
-
 void *uacpi_kernel_alloc(uacpi_size size) {
+    if (init_arena_once() != 0) {
+        printf("uacpi_kernel_alloc: arena init failed\n");
+        return NULL;
+    }
     return tlsf_malloc(uacpi_kernel_tlsf, size);
 }
 

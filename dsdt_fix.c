@@ -180,11 +180,13 @@ int fix_dsdt(EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     {
         uacpi_status ret = uacpi_initialize(0);
         if (UACPI_STATUS_OK != ret) {
+            printf("uacpi_initialize(0) failed: %s\n", uacpi_status_to_string(ret));
             return 1;
         }
 
         ret = uacpi_namespace_load();
         if (UACPI_STATUS_OK != ret) {
+            printf("uacpi_namespace_load() failed: %s\n", uacpi_status_to_string(ret));
             uacpi_state_reset();
             return 1;
         }
