@@ -13,6 +13,8 @@ PLATFORM_CFLAGS = \
 
 OPTIMIZE_CFLAGS = \
     -O3 -ffast-math \
+    -fno-stack-protector \
+    -fomit-frame-pointer
 
 LINT_CFLAGS = \
     -Wall
@@ -34,7 +36,7 @@ PLATFORM_LDFLAGS = \
 	'-Wl,-subsystem:efi_application' \
 	-fuse-ld=lld-link
 
-LDFLAGS = $(PLATFORM_LDFLAGS) -Wl,-DEBUG
+LDFLAGS = $(PLATFORM_LDFLAGS) -Wl,-DEBUG -Wl,-stack:262144
 
 POSIX_UEFI_OBJS = \
 	$(POSIX_UEFI_PATH)/uefi/crt_aarch64.o \

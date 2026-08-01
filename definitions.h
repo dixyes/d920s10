@@ -22,7 +22,7 @@
     bright(); printf(fmt, ##__VA_ARGS__); white(); \
 } while (0)
 
-// definations missing in posix-uefi
+// definitions missing in posix-uefi
 
 #define EFI_ACPI_2_0_ROOT_SYSTEM_DESCRIPTION_POINTER_REVISION 0x02
 

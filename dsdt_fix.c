@@ -171,11 +171,16 @@ out:
     return ret;
 }
 
+extern uint64_t midr; // at tablesfix.c
+
 int fix_dsdt(EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     dsdt_walker_data data = { NULL, NULL, { 0 } };
 
-    // if this failed, we assume all DDRCs are offline
-    (void)hob_get_online_ddrcs(acpi_table, data.online_ddrcs_base);
+    if ((midr & 0xFFFFFFFF) == 0x481fd010) {
+        // Hisilicon Hi1620
+        // if this failed, we assume all DDRCs are offline
+        (void)hob_get_online_ddrcs(acpi_table, data.online_ddrcs_base);
+    }
 
     {
         uacpi_status ret = uacpi_initialize(0);

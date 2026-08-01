@@ -2,6 +2,8 @@
 
 #include "dsdt_fix.h"
 
+uint64_t midr = 0;
+
 static const efi_guid_t acpi_guid = ACPI_TABLE_GUID;
 static const efi_guid_t acpi2_guid = ACPI_20_TABLE_GUID;
 static const efi_guid_t gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
@@ -12,7 +14,7 @@ static const efi_guid_t smbios_guid = EFI_SMBIOS_PROTOCOL_GUID;
 static int install_dbg2 (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     uintn_t table_key;
 
-    EFI_ACPI_DEBUG_PORT_2_TABLE Dbg2 = {
+    static const EFI_ACPI_DEBUG_PORT_2_TABLE Dbg2 = {
         {
             ARM_ACPI_HEADER(
                 0x32474244 /*EFI_ACPI_6_1_DEBUG_PORT_2_TABLE_SIGNATURE, "DBG2" in le*/,
@@ -55,6 +57,14 @@ static int install_dbg2 (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
             }
         }
     };
+    switch (midr & 0xFFFFFFFF) {
+        case 0x481fd010:
+            // Hisilicon Hi1620, use PL011 at 0x94080000 (default)
+            break;
+        default:
+            printf("install_dbg2: unknown midr_el1 %016lx, cannot set dbg2\n", midr);
+            return 1;
+    }
 
     efi_status_t ret = acpi_table->InstallAcpiTable(acpi_table, &Dbg2, sizeof(Dbg2), &table_key);
     if (EFI_SUCCESS != ret) {
@@ -69,7 +79,7 @@ static int install_dbg2 (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
 static int install_spcr (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
     uintn_t table_key;
 
-    EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE Spcr = {
+    static const EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE Spcr = {
         ARM_ACPI_HEADER ( 0x52435053 /* EFI_ACPI_6_2_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_SIGNATURE, "SPCR" in le */,
                         EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE,
                         0x02 /*EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_REVISION*/),
@@ -118,6 +128,14 @@ static int install_spcr (EFI_ACPI_TABLE_PROTOCOL *acpi_table) {
         // UINT32                                  Reserved3;
         EFI_ACPI_RESERVED_DWORD
     };
+    switch (midr & 0xFFFFFFFF) {
+        case 0x481fd010:
+            // Hisilicon Hi1620, use PL011 at 0x94080000 (default)
+            break;
+        default:
+            printf("install_dbg2: unknown midr_el1 %016lx, cannot set dbg2\n", midr);
+            return 1;
+    }
 
     efi_status_t ret = acpi_table->InstallAcpiTable(acpi_table, &Spcr, sizeof(Spcr), &table_key);
     if (EFI_SUCCESS != ret) {
@@ -345,7 +363,6 @@ static char *dmi_string(const EFI_SMBIOS_TABLE_HEADER *dm, uint8_t s)
 	return !*bp ? NULL : bp;
 }
 
-
 int main(int argc, char **argv) {
     efi_status_t ret;
     efi_gop_t *gop = NULL;
@@ -367,6 +384,12 @@ int main(int argc, char **argv) {
     efi_configuration_table_t *p_table;
     EFI_ACPI_2_0_ROOT_SYSTEM_DESCRIPTION_POINTER *rsdp;
     EFI_ACPI_SDT_HEADER *xsdt, **sdt;
+
+    {
+        uint64_t __midr;
+        asm volatile("mrs %0, midr_el1" : "=r"(__midr));
+        midr = __midr;
+    }
 
     ret = BS->LocateProtocol((void*)&gop_guid, NULL, (void**)&gop);
     if(EFI_ERROR(ret) || !gop) {
