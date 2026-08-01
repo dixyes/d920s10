@@ -4,6 +4,7 @@
 #define UACPI_OVERRIDE_TYPES
 #include "uacpi/uacpi.h"
 #pragma pop_macro("_MSC_VER")
+#include "tlsf.h"
 
 extern const efi_guid_t acpi_guid;
 extern const efi_guid_t acpi2_guid;
@@ -95,61 +96,61 @@ void uacpi_kernel_release_mutex(uacpi_handle handle) {
     // do nothing
 }
 
-static char *uacpi_kernel_arena;
-static size_t uacpi_kernel_arena_size;
-static size_t uacpi_kernel_arena_next_offset;
+static tlsf_t uacpi_kernel_tlsf;
+
+#define UACPI_KERNEL_ARENA_SIZE (64 * 1024 * 1024) // 64 MB
 
 uacpi_status uacpi_kernel_initialize(uacpi_init_level current_init_lvl) {
     (void)current_init_lvl;
 
-    if (uacpi_kernel_arena)
+    if (uacpi_kernel_tlsf) {
         return UACPI_STATUS_OK;
+    }
+    
+    void *arena = NULL;
 
     // prepare arena for uACPI alloc
-    uacpi_kernel_arena_size = 64 * 1024 * 1024; // 64 MB
     efi_status_t ret = BS->AllocatePool(
         EfiBootServicesData,
-        uacpi_kernel_arena_size,
-        (void**)&uacpi_kernel_arena
+        UACPI_KERNEL_ARENA_SIZE,
+        (void**)&arena
     );
     if (ret != EFI_SUCCESS) {
         return UACPI_STATUS_DENIED;
     }
 
-    memset(uacpi_kernel_arena, 0, uacpi_kernel_arena_size);
+    uacpi_kernel_tlsf = tlsf_create_with_pool(arena, UACPI_KERNEL_ARENA_SIZE);
 
     return UACPI_STATUS_OK;
 }
 
 void uacpi_kernel_deinitialize(void) {
+    tlsf_destroy(uacpi_kernel_tlsf);
+
+    void *arena = tlsf_get_pool(uacpi_kernel_tlsf);
+
     // prepare arena for uACPI alloc
     // printf("freeing with size: %ld\n", uacpi_kernel_arena_next_offset);
-    efi_status_t ret = BS->FreePool(uacpi_kernel_arena);
+    efi_status_t ret = BS->FreePool(arena);
     if (ret != EFI_SUCCESS) {
         printf("uACPI kernel deinitialize failed to free arena: %d\n", ret);
     }
 }
 
-void *uacpi_kernel_alloc_zeroed(uacpi_size size) {
-    if (uacpi_kernel_arena_next_offset + size > uacpi_kernel_arena_size) {
-        // Out of memory
-        printf("uACPI kernel arena out of memory\n");
-        return NULL;
-    }
-
-    void *ptr = uacpi_kernel_arena + uacpi_kernel_arena_next_offset;
-    uacpi_kernel_arena_next_offset += (size + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1); // Align to pointer size
-
-    return ptr;
-}
+// void *uacpi_kernel_alloc_zeroed(uacpi_size size) {
+//     void *ptr = tlsf_malloc(uacpi_kernel_tlsf, size);
+//     if (ptr) {
+//         memset(ptr, 0, size);
+//     }
+//     return ptr;
+// }
 
 void *uacpi_kernel_alloc(uacpi_size size) {
-    return uacpi_kernel_alloc_zeroed(size);
+    return tlsf_malloc(uacpi_kernel_tlsf, size);
 }
 
 void uacpi_kernel_free(void *mem) {
-    (void)mem;
-    // do nothing, memory is managed in a simple arena
+    tlsf_free(uacpi_kernel_tlsf, mem);
 }
 
 uacpi_u64 uacpi_kernel_get_nanoseconds_since_boot(void) {
