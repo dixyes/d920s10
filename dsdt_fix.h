@@ -1,7 +1,7 @@
 #ifndef _DSDT_FIX_H_
 #define _DSDT_FIX_H_
 
-#include "definations.h"
+#include "definitions.h"
 
 int fix_dsdt(EFI_ACPI_TABLE_PROTOCOL *acpi_table);
 

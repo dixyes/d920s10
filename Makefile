@@ -80,7 +80,8 @@ UACPI_OBJS = \
 	$(UACPI_PATH)/source/sleep.o \
 	$(UACPI_PATH)/source/registers.o \
 	$(UACPI_PATH)/source/resources.o \
-	$(UACPI_PATH)/source/mutex.o
+	$(UACPI_PATH)/source/mutex.o \
+	$(UACPI_PATH)/source/event.o
 
 UACPI_DEFS = \
 	-DUACPI_REDUCED_HARDWARE \
@@ -110,6 +111,9 @@ tablesfix.efi: tablesfix.o dsdt_fix.o hob.o aml.o uacpi_kernel.o $(POSIX_UEFI_OB
 	$(CC) $(LDFLAGS) $^ -o $@
 
 readnor.efi: readnor.o $(POSIX_UEFI_OBJS)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+regsfuck.efi: regsfuck.o $(POSIX_UEFI_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 patch_bl: patch_bl.c

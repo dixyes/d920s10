@@ -1,7 +1,7 @@
 #ifndef _HOB_H_
 #define _HOB_H_
 
-#include "definations.h"
+#include "definitions.h"
 
 // hisi Memory Map HOB things
 
@@ -9,7 +9,7 @@
 // removed recently, see 202502-before-platform-removals tag
 #define EFI_MEMORY_MAP_GUID \
   { \
-    0xf8870015,0x6994,0x4b98,0x95,0xa2,0xbd,0x56,0xda,0x91,0xc0,0x7f \
+    0xf8870015,0x6994,0x4b98, { 0x95,0xa2,0xbd,0x56,0xda,0x91,0xc0,0x7f } \
   }
 
 // from edk2-platforms/Silicon/Hisilicon/Hi1610/Include/PlatformArch.h

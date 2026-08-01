@@ -28,7 +28,7 @@ int hob_get_online_ddrcs (EFI_ACPI_TABLE_PROTOCOL *acpi_table, uintptr_t *online
     }
 
     // iterate hob list to find EFI_MEMORY_MAP_GUID
-    hob = (uint8_t *)hobStart;
+    hob = (char *)hobStart;
     hdr = (EFI_HOB_GENERIC_HEADER *)hob;
 
     while (hdr->HobType != 0xFFFF) {  // 0xFFFF = End of HOB List
@@ -82,6 +82,7 @@ int hob_get_online_ddrcs (EFI_ACPI_TABLE_PROTOCOL *acpi_table, uintptr_t *online
                     default:
                         // ??
                         abort();
+                        return 1;
                 }
                 printf("hob_get_online_ddrcs: online socket %d channel %d at 0x%016lx\n", socket, ch, base + 0x10000ULL * (uintptr_t)ch);
                 online_ddrcs_base[socket * MAX_CHANNEL + ch] = base + 0x10000ULL * (uintptr_t)ch;
