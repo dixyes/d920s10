@@ -68,9 +68,9 @@ int main(int argc, const char **argv) {
     }
     printf("LocateProtocol HISI_SPI_FLASH_PROTOCOL success\n");
 
-    FILE *fp = fopen(dst, "wb");
+    FILE *fp = fopen(dst, "w");
     if (NULL == fp) {
-        printf("failed open file %s\n", dst);
+        printf("failed open file %s: errno=%d\n", dst, errno);
         return 1;
     }
 
