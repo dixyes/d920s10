@@ -12,11 +12,11 @@
     0xf8870015,0x6994,0x4b98, { 0x95,0xa2,0xbd,0x56,0xda,0x91,0xc0,0x7f } \
   }
 
-// from edk2-platforms/Silicon/Hisilicon/Hi1610/Include/PlatformArch.h
+// from edk2-platforms/Silicon/Hisilicon/Hi1620/Include/PlatformArch.h
 // removed recently, see 202502-before-platform-removals tag
 #define MAX_SOCKET      2
-#define MAX_CHANNEL     4
-#define MAX_DIMM        3
+#define MAX_CHANNEL     8
+#define MAX_DIMM        2
 #define MAX_RANK_DIMM   4
 
 // from edk2-platforms/Silicon/Hisilicon/Include/Library/HwMemInitLib.h

@@ -57,6 +57,7 @@ int hob_get_online_ddrcs (EFI_ACPI_TABLE_PROTOCOL *acpi_table, uintptr_t *online
             uint8_t channel_online = 0;
             for (int dimm = 0; dimm < MAX_DIMM; dimm++) {
                 DDR_DIMM_DATA *d = &gbl->Channel[socket][ch].Dimm[dimm];
+                // printf("hob_get_online_ddrcs: socket %d channel %d dimm %d is %s\n", socket, ch, dimm, d->Enabled ? "enabled" : "disabled");
                 if (d->Enabled) {
                     channel_online = 1;
                     break;
