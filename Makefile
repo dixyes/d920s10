@@ -22,7 +22,7 @@ INCLUDES = \
 	-I$(POSIX_UEFI_PATH)/uefi \
 	-I$(UACPI_PATH)/include
 
-CFLAGS = $(PLATFORM_CFLAGS) $(OPTIMIZE_CFLAGS) $(LINT_CFLAGS) $(INCLUDES)
+CFLAGS = $(PLATFORM_CFLAGS) $(OPTIMIZE_CFLAGS) $(LINT_CFLAGS) $(INCLUDES) $(UACPI_DEFS)
 
 HOST_CFLAGS = \
 	-Wall
@@ -85,8 +85,7 @@ UACPI_OBJS = \
 
 UACPI_DEFS = \
 	-DUACPI_REDUCED_HARDWARE \
-	-DUACPI_KERNEL_INITIALIZATION \
-	-DUACPI_NATIVE_ALLOC_ZEROED
+	-DUACPI_KERNEL_INITIALIZATION
 
 .PHONY: uacpi
 uacpi:
@@ -100,7 +99,7 @@ uacpi:
 $(UACPI_PATH)/source/%.o: $(UACPI_PATH)/source/%.c uacpi_platform.h
 	$(CC) $(UACPI_DEFS) $(CFLAGS) -c $< -o $@
 
-%.o: %.c definations.h
+%.o: %.c definitions.h
 	$(CC) $(UACPI_DEFS) $(CFLAGS) -c $< -o $@
 
 .PHONY: uacpi-clean
@@ -111,9 +110,6 @@ tablesfix.efi: tablesfix.o dsdt_fix.o hob.o aml.o uacpi_kernel.o tlsf.o licenses
 	$(CC) $(LDFLAGS) $^ -o $@
 
 readnor.efi: readnor.o $(POSIX_UEFI_OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@
-
-regsfuck.efi: regsfuck.o $(POSIX_UEFI_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 patch_bl: patch_bl.c
