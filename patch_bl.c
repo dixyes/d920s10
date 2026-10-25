@@ -104,14 +104,28 @@ int patch_el3(size_t size, char *buf) {
     fip_header *header = (fip_header *)buf;
     if (header->magic != 0x12345678AA640001) {
         yprintf("Invalid FIP header magic: 0x%016lx, bad dump or mismatch endian (this tool is only for little endian)\n", header->magic);
-        return 1;
+        yprintf("You may reach segfault if the BL31 location is incorrect.\n");
+        //return 1;
     }
 
     // find BL31 image entry
     fip_entry *bl31_entry = NULL;
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 1024; i++) {
         fip_entry *entry = &header->entries[i];
+        
+        if (strlen(entry->uuid) == (16 - 1)) {
+            printf("UUID %d in str: ", i);
+            // Loop until the null terminator '\0' is reached
+            for (int i1 = 0; entry->uuid[i1] != '\0'; i1++) {
+                // %02X prints the hex in uppercase with at least 2 digits (e.g., 48)
+                printf("%02X ", (unsigned char)entry->uuid[i1]);
+            }
+            printf("\n");
+        }
+        
         if (memcmp(entry->uuid, "\x47\xD4\x08\x6D\x4C\xFE\x98\x46\x9B\x95\x29\x50\xCB\xBD\x5A\x00", 16) == 0) {
+            //GOOD: UUID   1 in str: 47 D4 08 6D 4C FE 98 46 9B 95 29 50 CB BD 5A
+            //BAD : UUID 262 in str: 47 D4 08 6D 4C FE 98 46 9B 95 29 50 CB BD 5A
             bl31_entry = entry;
             break;
         }
@@ -122,6 +136,7 @@ int patch_el3(size_t size, char *buf) {
     }
 
     printf("BL31 entry found at offset 0x%08lx, size 0x%08lx\n", bl31_entry->file_offset, bl31_entry->file_size);
+    //[732682.166249] traps: patch_bl[653173] general protection fault ip:58735e5c62f6 sp:7ffc6189ef00 error:0 in patch_bl[58735e5c6000+1000]
 
     // find pattern for storing stub
     const search_pattern *stub_pattern = NULL;
@@ -186,7 +201,8 @@ int main (int argc, char **argv) {
     char *buf = NULL;
     struct stat st;
 
-    printf("This patch is for D920S10 BIOS, to patch EL3 code to enable MPAM\n");
+    printf("This patch is developed for D920S10 / BC32MBSA BIOS, to patch EL3 in FIP image to enable MPAM\n");
+    printf("However it may apply with D920L11 / BC32MBHB a.k.a TK630, PT620K with similar UEFI BIOS.\n");
     if (argc < 3) {
         fprintf(stderr, "Usage: %s <bios dump as input_file> <patched dump as output_file>\n", argv[0]);
         goto end;
@@ -201,11 +217,9 @@ int main (int argc, char **argv) {
         goto end;
     }
 
-    for (int i = 0; i < 3; i++) {
-        fprintf(stderr, "\033[31mThis patch is ABSOLUTELY NO WARRANTY\033[0m\n");
-        fprintf(stderr, "\033[31mUSE AT YOUR OWN RISK\033[0m\n");
-        sleep(1);
-    }
+    // Most BIOS modder are so chill about this actually.
+    fprintf(stderr, "\033[31mThis patch is ABSOLUTELY NO WARRANTY\033[0m\n");
+    fprintf(stderr, "\033[31mUSE AT YOUR OWN RISK\033[0m\n");
 
     fdr = open(argv[1], O_RDONLY);
     if (fdr < 0) {
@@ -213,8 +227,27 @@ int main (int argc, char **argv) {
         goto end;
     }
 
+    // D920L11, a.k.a TK630, PT620K
+    // const unsigned long FIP_BL31 = 0xBB0000;
+    // D920S10, a.k.a TK620, or W510
+    const unsigned long FIP_BL31 = 0xba0000;
+    const unsigned long FIP_BINSIZE = 0x100000;
+
+    yprintf("Hint: Search for 0x010064AA78563412 in HxD or UEFITool\n");
+    yprintf("Otherwise brute search for BL31 pattern, and scroll backward until 0xFF wall is found.\n");
+    yprintf("D920S10 use 0xba0000, but D920L11 is 0xbb0000\n");
+    yprintf("BL31 pattern: 47D4086D4CFE98469B952950CBBD5A00\n");
+    yprintf("Assembly to hack: FF4403D5000080D240111ED5\n");
+    //More  : Search in ASCII. Found in around the BL31 area.
+    //PT620K: "v2.2(release):LOG-uniBIOS_Hi1620_V200R002C20B017-1393-gdb88a21-dirty"
+    //TK630 : "v1.5(release):LOG-uniBIOS_Hi1620_V200R002C20B017-1117-ge1dc39c-dirty"
+    //More  : Brute search in entire firmware
+    //PT620K: "D920L11K-2251K"
+    //TK630 : "D920L11B005"
+
+    printf("FIP_BL31: 0x%06lx, FIP_BINSIZE: 0x%06lx\n", FIP_BL31, FIP_BINSIZE);
     // the BL31 is at 0xba0000
-    if (lseek(fdr, 0xba0000, SEEK_SET) != 0xba0000) {
+    if (lseek(fdr, FIP_BL31, SEEK_SET) != FIP_BL31) {
         perror("seek input file");
         goto end;
     }
@@ -223,19 +256,19 @@ int main (int argc, char **argv) {
         goto end;
     }
 
-    buf = malloc(0x100000);
+    buf = malloc(FIP_BINSIZE);
     if (!buf) {
         perror("malloc");
         goto end;
     }
 
-    ssize_t n = read(fdr, buf, 0x100000);
+    ssize_t n = read(fdr, buf, FIP_BINSIZE);
     if (n < 0) {
         perror("read input file");
         goto end;
     }
 
-    if (patch_el3(0x100000, buf)) {
+    if (patch_el3(FIP_BINSIZE, buf)) {
         fprintf(stderr, "Patch failed, file not changed\n");
         goto end;
     }
@@ -251,21 +284,21 @@ int main (int argc, char **argv) {
         perror("seek input file");
         goto end;
     }
-    if (sendfile(fdw, fdr, NULL, 0xba0000) != 0xba0000) {
+    if (sendfile(fdw, fdr, NULL, FIP_BL31) != FIP_BL31) {
         perror("copy input file to output file");
         goto end;
     }
     // write patched BL31
-    if (write(fdw, buf, 0x100000) != 0x100000) {
+    if (write(fdw, buf, FIP_BINSIZE) != FIP_BINSIZE) {
         perror("write patched BL31 to output file");
         goto end;
     }
     // write remaining file 0xbc0000 - end
-    if (lseek(fdr, 0xba0000 + 0x100000, SEEK_SET) != 0xba0000 + 0x100000) {
+    if (lseek(fdr, FIP_BL31 + FIP_BINSIZE, SEEK_SET) != FIP_BL31 + FIP_BINSIZE) {
         perror("seek input file");
         goto end;
     }
-    if (sendfile(fdw, fdr, NULL, st.st_size - 0xba0000 - 0x100000) != st.st_size - 0xba0000 - 0x100000) {
+    if (sendfile(fdw, fdr, NULL, st.st_size - FIP_BL31 - FIP_BINSIZE) != st.st_size - FIP_BL31 - FIP_BINSIZE) {
         perror("copy remaining input file to output file");
         goto end;
     }
