@@ -618,8 +618,9 @@ int main(int argc, char **argv) {
 
     // chainload
     if (argc == 0 || (argc > 1 && !strcmp(argv[1], "chainload"))) {
-        chainload_bootmgr();
-        //printf("done\n");
+        //chainload_bootmgr();
+        // Need exit for startup.nsh integration (undefshim).
+        printf("done\n");
     } else {
         printf("done\n");
     }

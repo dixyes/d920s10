@@ -1,8 +1,21 @@
-# ACPI fix for D920S10 Windows/Linux boot
+# ACPI fix for D920L11 Windows/Linux boot
+
+Works with ~~D920S10/THTF TK620/W510~~ D920L11/THTF TK630/PT620K firmware, should also work for other 1-way hi1620 systems (~~D920L11~~ D920S10 maybe)
+
+- Visit [tk630-win11-26h2](https://github.com/6DammK9/tk630-win11-26h2) and [tk630-win11-23h2](https://github.com/6DammK9/tk630-win11-23h2) for "PC build guide". The contents below are kept for reference.
+  
+- Breaking changes from original repo:
+  - `patch_bl.c` is using different hex address
+  - `Makefile` is using `clang` in Winodws WSL environment (amd64) for cross arch build target.
+  - `tablesfix.c` has chain load disabled. Boot with `startup.nsh` instead (Post-install). For OS installation, use 2 USBs instead of 1, which this repo being bootloader, and the Windows installation media can be untouched.
+
+- **Only tested for 26H2.** For 23H2, use my prebuilt `tablesfix-tk630-nochain.efi` in [tk630-win11-23h2](https://github.com/6DammK9/tk630-win11-23h2) or force W510 option in the older [20240709](https://github.com/dixyes/d920s10/releases/tag/20240709) version.
+  - TK630 may not have UEFI Shell, somehow it switch to next boot option when the EFI application exit, so just rename `tablesfix-tk630-nochain.efi` into `bootaa64.efi` will be effective.
+  - 24H1 onward requires materials more than this repo. Make sure check out my guide above.
+
+------
 
 ## Usage
-
-Works with D920S10/THTF TK620/W510 firmware, should also work for other 1-way hi1620 systems (D920L11 maybe)
 
 ```
 Shell> .\tablesfix.efi

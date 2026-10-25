@@ -228,9 +228,9 @@ int main (int argc, char **argv) {
     }
 
     // D920L11, a.k.a TK630, PT620K
-    // const unsigned long FIP_BL31 = 0xBB0000;
+    const unsigned long FIP_BL31 = 0xBB0000;
     // D920S10, a.k.a TK620, or W510
-    const unsigned long FIP_BL31 = 0xba0000;
+    // const unsigned long FIP_BL31 = 0xba0000;
     const unsigned long FIP_BINSIZE = 0x100000;
 
     yprintf("Hint: Search for 0x010064AA78563412 in HxD or UEFITool\n");

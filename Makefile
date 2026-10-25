@@ -1,8 +1,8 @@
 
 POSIX_UEFI_PATH = posix-uefi
 UACPI_PATH = uACPI
-CC = clang
-HOST_CC = clang
+CC = /mnt/c/wsl_workspace/llvm-mingw-20261020-ucrt-ubuntu-22.04-x86_64/bin/clang
+HOST_CC = /mnt/c/wsl_workspace/llvm-mingw-20261020-ucrt-ubuntu-22.04-x86_64/bin/clang
 
 PLATFORM_CFLAGS = \
 	-target arm64-unknown-windows \
@@ -108,6 +108,7 @@ $(UACPI_PATH)/source/%.o: $(UACPI_PATH)/source/%.c uacpi_platform.h
 uacpi-clean:
 	rm -f $(UACPI_OBJS)
 
+# licenses.o?
 tablesfix.efi: tablesfix.o dsdt_fix.o hob.o aml.o uacpi_kernel.o tlsf.o $(POSIX_UEFI_OBJS) $(UACPI_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
