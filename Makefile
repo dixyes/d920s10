@@ -108,7 +108,7 @@ $(UACPI_PATH)/source/%.o: $(UACPI_PATH)/source/%.c uacpi_platform.h
 uacpi-clean:
 	rm -f $(UACPI_OBJS)
 
-tablesfix.efi: tablesfix.o dsdt_fix.o hob.o aml.o uacpi_kernel.o tlsf.o $(POSIX_UEFI_OBJS) $(UACPI_OBJS)
+tablesfix.efi: tablesfix.o dsdt_fix.o hob.o aml.o uacpi_kernel.o tlsf.o license.o $(POSIX_UEFI_OBJS) $(UACPI_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 readnor.efi: readnor.o $(POSIX_UEFI_OBJS)
