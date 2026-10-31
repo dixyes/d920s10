@@ -451,12 +451,16 @@ int main(int argc, char **argv) {
             printf("System Manufacturer: %s\n", dmi_string(smbios_table, ((SMBIOS_TABLE_TYPE1 *) smbios_table)->Manufacturer));
             p_str = dmi_string(smbios_table, ((SMBIOS_TABLE_TYPE1 *) smbios_table)->ProductName);
             printf("System Product Name: %s\n", p_str);
+            // No longer need W510 for build 20260725
             if (p_str && (
+                //memmem(p_str, strlen(p_str), "TK630", 5) ||
                 memmem(p_str, strlen(p_str), "W510", 4) ||
                 memmem(p_str, strlen(p_str), "PGU-WBY0", 8)
             )) {
                 is_w510 = 1;
             }
+            //printf("Force is_w510\n");
+            //is_w510 = 1;
         }
 
         // type 4
@@ -615,6 +619,7 @@ int main(int argc, char **argv) {
     // chainload
     if (argc == 0 || (argc > 1 && !strcmp(argv[1], "chainload"))) {
         chainload_bootmgr();
+        //printf("done\n");
     } else {
         printf("done\n");
     }
